@@ -71,7 +71,7 @@
     <main>
         @yield('content')
     </main>
-    
+    @include('clients.partials.footer_home')
 
    
 

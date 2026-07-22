@@ -12,7 +12,7 @@ $menuData = [
         'bg_color' => '#D6C5B3',
         'grid_cols' => 'lg:grid-cols-3',
         'items' => [
-            ['id' => 'bs1', 'name' => 'Trà Sữa Truyền Thống', 'prices' => ['S' => 20, 'L' => 25], 'tag' => 'hot', 'image' => 'truyenthong.jpg'],
+            ['id' => 'bs1', 'name' => 'Trà Sữa Truyền Thống', 'prices' => ['S' => 20, 'L' => 25], 'tag' => 'hot', 'image' => 'hongtra.JPG'],
             ['id' => 'bs2', 'name' => 'Matcha Latte Oatside Vị Nguyên Bản', 'prices' => ['L' => 28], 'tag' => 'hot', 'image' => 'matchalatte.jpg'],
             ['id' => 'bs3', 'name' => 'Trà Đào', 'prices' => ['S' => 20, 'L' => 25], 'tag' => 'hot', 'image' => 'tradao.jpg'],
         ],
@@ -184,9 +184,7 @@ $menuData = [
     </main>
 
     <!-- 3. NÚT GIỎ HÀNG NỔI (FAB) -->
-    <!-- Đã thêm sự kiện onclick mở Sidebar Giỏ hàng và thẻ span hiển thị số lượng -->
     <button onclick="openCartSidebar()" class="fixed bottom-8 right-8 bg-[#354A3D] text-white p-4 rounded-full shadow-xl hover:scale-105 transition-transform z-[60] flex items-center justify-center">
-        <!-- Chấm tròn hiển thị số lượng (Badge) -->
         <span id="cartBadge" class="absolute -top-2 -right-2 bg-[#F5A623] text-white text-[11px] font-bold w-6 h-6 flex items-center justify-center rounded-full border-2 border-[#F8F6F2] hidden transition-all duration-300 transform scale-0">0</span>
         
         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
@@ -253,7 +251,6 @@ $menuData = [
         <div class="absolute inset-0 bg-black/40 transition-opacity" onclick="closeCartSidebar()"></div>
         <div class="bg-[#F9F6F0] w-full max-w-md h-full relative z-10 flex flex-col shadow-2xl animate-[slideLeft_0.3s_ease-out]">
             
-            <!-- Header Giỏ hàng -->
             <div class="p-5 border-b border-black/5 bg-white flex justify-between items-center">
                 <h2 class="font-serif text-xl font-bold text-[#1F2937]">Giỏ hàng của bạn</h2>
                 <button onclick="closeCartSidebar()" class="text-gray-500 hover:text-gray-800 transition">
@@ -261,24 +258,16 @@ $menuData = [
                 </button>
             </div>
 
-            <!-- Danh sách món trong giỏ -->
-            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-4">
-                <!-- Nội dung giỏ hàng sẽ được JS render vào đây -->
-                <div class="h-full flex flex-col items-center justify-center text-gray-400 opacity-70">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-16 h-16 mb-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg>
-                    <p>Giỏ hàng đang trống</p>
-                </div>
-            </div>
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
 
-            <!-- Nút Thanh toán dưới cùng -->
             <div class="p-5 bg-white border-t border-black/5 shadow-[0_-4px_10px_rgba(0,0,0,0.02)]">
                 <div class="flex justify-between font-bold text-[#1F2937] text-lg mb-4">
                     <span>Tổng cộng:</span>
                     <span id="cartSidebarTotal">0k</span>
                 </div>
-                <button class="w-full bg-[#354A3D] text-white rounded-full py-4 px-6 font-bold shadow-md hover:bg-[#2A4435] transition-colors">
+                <a href="{{ url('/cart') }}" class="w-full bg-[#354A3D] text-white rounded-full py-4 px-6 font-bold shadow-md hover:bg-[#2A4435] transition-colors flex justify-center text-center block">
                     Tiến hành Thanh toán
-                </button>
+                </a>
             </div>
         </div>
     </div>
@@ -297,36 +286,26 @@ $menuData = [
 
 <!-- KỊCH BẢN JAVASCRIPT ĐIỀU KHIỂN POPUP & GIỎ HÀNG -->
 <script>
-    // --- STATE ĐẶT HÀNG ---
+    let cart = JSON.parse(localStorage.getItem('fadegra_cart')) || [];
     let currentItem = null;
     let basePrice = 0;
     let quantity = 1;
     let toppingsPrice = 0;
-    
-    // Dữ liệu món đang chọn
-    let selectedSizeName = 'Mặc định'; 
-    let selectedToppingsList = []; // Mảng chứa tên topping
-
-    // Dữ liệu Giỏ hàng toàn cục
-    let cart = []; 
+    let selectedSizeName = '';
+    let selectedToppingsList = [];
 
     const formatPrice = (price) => `${price}k`;
 
-    // ==========================================
-    // 1. CHỨC NĂNG MODAL CHỌN MÓN (POPUP)
-    // ==========================================
     function openOrderModal(item, bgColor, emoji) {
         currentItem = item;
         quantity = 1;
         toppingsPrice = 0;
         basePrice = 0;
         selectedSizeName = '';
-        selectedToppingsList = []; // Xóa danh sách topping cũ
+        selectedToppingsList = [];
 
-        // Xóa dấu vết hiển thị cũ
         document.getElementById('modalQuantity').innerText = '1';
 
-        // Render Vùng Ảnh
         const imageArea = document.getElementById('modalImageArea');
         imageArea.style.backgroundColor = bgColor;
         
@@ -343,7 +322,6 @@ $menuData = [
 
         document.getElementById('modalTitle').innerText = item.name;
         
-        // Render Chọn Size
         const sizesDiv = document.getElementById('modalSizes');
         sizesDiv.innerHTML = '';
         document.getElementById('sizeSection').style.display = 'block';
@@ -365,7 +343,6 @@ $menuData = [
 
         document.getElementById('modalBasePriceDisplay').innerText = `Từ ${basePrice}000đ`;
 
-        // Reset nút Topping
         document.querySelectorAll('.topping-btn').forEach(btn => {
             btn.dataset.selected = "false";
             btn.classList.remove('border-[#354A3D]', 'text-[#354A3D]', 'bg-[#354A3D]/5');
@@ -410,9 +387,7 @@ $menuData = [
         if (isSelected) {
             element.dataset.selected = "false";
             toppingsPrice -= price;
-            // Xóa khỏi mảng topping
             selectedToppingsList = selectedToppingsList.filter(t => t !== toppingName);
-
             element.classList.remove('border-[#354A3D]', 'bg-[#354A3D]/5');
             element.classList.add('border-black/10');
             element.querySelector('span:first-child').classList.remove('text-[#354A3D]');
@@ -421,9 +396,7 @@ $menuData = [
         } else {
             element.dataset.selected = "true";
             toppingsPrice += price;
-            // Thêm vào mảng topping
             selectedToppingsList.push(toppingName);
-
             element.classList.add('border-[#354A3D]', 'bg-[#354A3D]/5');
             element.classList.remove('border-black/10');
             element.querySelector('span:first-child').classList.add('text-[#354A3D]');
@@ -446,34 +419,26 @@ $menuData = [
         document.getElementById('modalTotalPrice').innerText = formatPrice(total);
     }
 
-    // THÊM VÀO GIỎ HÀNG
     function submitOrder() {
         const cartItem = {
-            id: Date.now().toString(), // Tạo ID duy nhất cho mỗi dòng giỏ hàng
+            id: Date.now().toString(),
             name: currentItem.name,
             size: selectedSizeName,
-            toppings: [...selectedToppingsList], // Copy mảng
+            toppings: [...selectedToppingsList],
             quantity: quantity,
             pricePerItem: basePrice + toppingsPrice,
-            totalPrice: (basePrice + toppingsPrice) * quantity
+            totalPrice: (basePrice + toppingsPrice) * quantity,
+            image: currentItem.image ? currentItem.image : null
         };
-
-        // Đẩy vào mảng Giỏ hàng
         cart.push(cartItem);
+        localStorage.setItem('fadegra_cart', JSON.stringify(cart));
         
-        // Cập nhật giao diện
         updateCartUI();
         closeOrderModal();
-        
-        // Mở luôn Sidebar cho khách thấy
         openCartSidebar();
     }
 
-    // ==========================================
-    // 2. CHỨC NĂNG QUẢN LÝ GIỎ HÀNG
-    // ==========================================
     function updateCartUI() {
-        // Cập nhật con số ở nút FAB
         const badge = document.getElementById('cartBadge');
         let totalQuantity = 0;
         let grandTotal = 0;
@@ -490,10 +455,9 @@ $menuData = [
         } else {
             badge.classList.remove('scale-100');
             badge.classList.add('scale-0');
-            setTimeout(() => badge.classList.add('hidden'), 300); // Ẩn mượt mà
+            setTimeout(() => badge.classList.add('hidden'), 300);
         }
 
-        // Cập nhật Sidebar Giỏ hàng
         const container = document.getElementById('cartItemsContainer');
         if (cart.length === 0) {
             container.innerHTML = `
@@ -522,18 +486,15 @@ $menuData = [
                 `;
             });
         }
-
-        // Cập nhật tổng tiền dưới footer Sidebar
         document.getElementById('cartSidebarTotal').innerText = formatPrice(grandTotal);
     }
 
-    // Xóa món khỏi giỏ
     function removeFromCart(id) {
         cart = cart.filter(item => item.id !== id);
+        localStorage.setItem('fadegra_cart', JSON.stringify(cart));
         updateCartUI();
     }
 
-    // Mở / Đóng Sidebar Giỏ Hàng
     function openCartSidebar() {
         const sidebar = document.getElementById('cartSidebar');
         sidebar.classList.remove('hidden');
@@ -547,5 +508,9 @@ $menuData = [
         sidebar.classList.remove('flex');
         document.body.style.overflow = 'auto'; 
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        updateCartUI();
+    });
 </script>
 @endsection

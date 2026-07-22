@@ -19,7 +19,7 @@
                 <a href="#" class="hover:text-cream-accent transition-colors" title="Tài khoản">
                     <i class="fa-regular fa-user"></i>
                 </a>
-                <a href="#" class="hover:text-cream-accent transition-colors relative" title="Giỏ hàng">
+                <a href="{{ url('/cart') }}" class="hover:text-cream-accent transition-colors relative" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping"></i>
                 </a>
                 <a href="#" class="hover:text-cream-accent transition-colors" title="Tìm kiếm">
