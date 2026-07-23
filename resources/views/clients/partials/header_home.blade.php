@@ -16,9 +16,21 @@
 
             <!-- Icons -->
             <div class="flex items-center space-x-6 text-white text-lg">
-                <a href="#" class="hover:text-cream-accent transition-colors" title="Tài khoản">
-                    <i class="fa-regular fa-user"></i>
-                </a>
+                @if(Auth::check())
+                    <a href="#" class="hover:text-cream-accent transition-colors text-sm font-medium" title="Tài khoản">
+                        Xin chào, {{ Auth::user()->name }}
+                    </a>
+                    <form action="{{ route('logout') }}" method="POST" class="inline">
+                        @csrf
+                        <button type="submit" class="hover:text-cream-accent transition-colors text-sm" title="Đăng xuất">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ url('/login') }}" class="hover:text-cream-accent transition-colors" title="Tài khoản">
+                        <i class="fa-regular fa-user"></i>
+                    </a>
+                @endif
                 <a href="{{ url('/cart') }}" class="hover:text-cream-accent transition-colors relative" title="Giỏ hàng">
                     <i class="fa-solid fa-bag-shopping"></i>
                 </a>
