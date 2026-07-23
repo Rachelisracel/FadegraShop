@@ -12,7 +12,7 @@ $menuData = [
         'bg_color' => '#D6C5B3',
         'grid_cols' => 'lg:grid-cols-3',
         'items' => [
-            ['id' => 'bs1', 'name' => 'Trà Sữa Truyền Thống', 'prices' => ['S' => 20, 'L' => 25], 'tag' => 'hot', 'image' => 'hongtra.JPG'],
+            ['id' => 'bs1', 'name' => 'Trà Sữa Truyền Thống', 'prices' => ['S' => 20, 'L' => 25], 'tag' => 'hot', 'image' => 'truyenthong.jpg'],
             ['id' => 'bs2', 'name' => 'Matcha Latte Oatside Vị Nguyên Bản', 'prices' => ['L' => 28], 'tag' => 'hot', 'image' => 'matchalatte.jpg'],
             ['id' => 'bs3', 'name' => 'Trà Đào', 'prices' => ['S' => 20, 'L' => 25], 'tag' => 'hot', 'image' => 'tradao.jpg'],
         ],

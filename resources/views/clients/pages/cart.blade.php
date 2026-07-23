@@ -63,7 +63,7 @@
                     </div>
 
                     <a href="{{ url('/checkout') }}" class="w-full bg-[#354A3D] text-white rounded-xl py-4 font-bold shadow-md hover:bg-[#2A4435] transition-colors flex justify-center items-center gap-2 block text-center">
-    Tiến hành thanh toán
+    Thanh toán
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M17.25 8.25L21 12m0 0l-3.75 3.75M21 12H3" /></svg>
 </a>
                 </div>

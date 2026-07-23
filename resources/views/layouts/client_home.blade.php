@@ -67,7 +67,6 @@
 <body class="bg-cream font-sans text-gray-800 antialiased selection:bg-cream-accent selection:text-forest">
 
     @include('clients.partials.header_home')
-
     <main>
         @yield('content')
     </main>

@@ -39,24 +39,24 @@
                         </div>
                     </div>
                     <div>
-                        <input type="text" required placeholder="Địa chỉ (Ví dụ: 123 Nguyễn Huệ)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
+                        <input type="text" id="addressInput" onblur="autoCalculateDistance()" required placeholder="Địa chỉ (Ví dụ: 123 Nguyễn Huệ)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <select class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-600 focus:outline-none focus:border-[#354A3D]">
-                            <option>Tỉnh thành</option>
-                            <option>Hồ Chí Minh</option>
-                            <option>Hà Nội</option>
+                        <select id="provinceSelect" onchange="onProvinceChange()" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-600 focus:outline-none focus:border-[#354A3D]">
+                            <option value="">Tỉnh thành</option>
                         </select>
-                        <select class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-600 focus:outline-none focus:border-[#354A3D]">
-                            <option>Quận huyện</option>
-                            <option>Quận 1</option>
-                            <option>Quận 3</option>
+                        <select id="districtSelect" onchange="onDistrictChange()" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-600 focus:outline-none focus:border-[#354A3D]">
+                            <option value="">Quận huyện</option>
                         </select>
-                        <select class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-600 focus:outline-none focus:border-[#354A3D]">
-                            <option>Phường xã</option>
-                            <option>Phường Bến Nghé</option>
+                        <select id="wardSelect" onchange="autoCalculateDistance()" class="bg-gray-50 border border-gray-200 rounded-xl px-3 py-3 text-sm text-gray-600 focus:outline-none focus:border-[#354A3D]">
+                            <option value="">Phường xã</option>
                         </select>
+                    </div>
+
+                    <div id="distanceContainer" class="hidden">
+                        <input type="text" id="distanceInput" readonly placeholder="Hệ thống đang tính khoảng cách giao hàng..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition text-gray-500 bg-gray-100">
+                        <p id="distanceErrorMsg" class="text-xs text-red-500 mt-1 hidden">Không thể tự động tính khoảng cách, hệ thống sẽ sử dụng mức phí mặc định.</p>
                     </div>
 
                     <div>
@@ -67,8 +67,8 @@
                 <!-- 2. Vận chuyển -->
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-black/5 space-y-4">
                     <h2 class="font-serif text-xl font-bold text-[#1F2937]">Vận chuyển</h2>
-                    <div class="bg-[#EBF3F0] border border-[#354A3D]/20 text-[#354A3D] p-4 rounded-xl text-sm font-medium">
-                        Vui lòng nhập thông tin giao hàng để hiển thị phương thức vận chuyển.
+                    <div id="shippingMethodContainer" class="bg-[#EBF3F0] border border-[#354A3D]/20 text-[#354A3D] p-4 rounded-xl text-sm font-medium">
+                        Vui lòng chọn Tỉnh thành để hiển thị phương thức vận chuyển.
                     </div>
                 </div>
 
@@ -112,7 +112,7 @@
                         </div>
                         <div class="flex justify-between">
                             <span>Phí vận chuyển</span>
-                            <span class="font-bold text-gray-800">Miễn phí</span>
+                            <span id="shippingFeeLabel" class="font-bold text-gray-800">Chưa xác định</span>
                         </div>
                     </div>
 
@@ -141,7 +141,8 @@
 
 <!-- JAVASCRIPT ĐỒNG BỘ GIỎ HÀNG VÀ XỬ LÝ ĐẶT HÀNG -->
 <script>
-    const SHIPPING_FEE = 0; // Miễn phí vận chuyển như hình mẫu
+    let currentShippingFee = 0;
+    let currentSubtotal = 0;
     let cart = JSON.parse(localStorage.getItem('fadegra_cart')) || [];
 
     const formatPrice = (price) => `${price}.000đ`;
@@ -149,7 +150,7 @@
     function renderCheckoutPage() {
         const container = document.getElementById('checkoutItemsList');
         let totalCount = 0;
-        let subtotal = 0;
+        currentSubtotal = 0;
 
         if (cart.length === 0) {
             container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Chưa có sản phẩm nào trong đơn hàng.</p>`;
@@ -162,7 +163,7 @@
         let html = '';
         cart.forEach(item => {
             totalCount += item.quantity;
-            subtotal += item.totalPrice;
+            currentSubtotal += item.totalPrice;
 
             const toppingText = item.toppings.length > 0 ? `<br><span class="text-xs text-gray-400">+ ${item.toppings.join(', ')}</span>` : '';
             const imageTag = item.image 
@@ -188,8 +189,188 @@
 
         container.innerHTML = html;
         document.getElementById('orderSummaryTitle').innerText = `Đơn hàng (${totalCount} sản phẩm)`;
-        document.getElementById('checkoutSubtotal').innerText = `${subtotal}.000đ`;
-        document.getElementById('checkoutGrandTotal').innerText = `${subtotal}.000đ`;
+        document.getElementById('checkoutSubtotal').innerText = `${currentSubtotal}.000đ`;
+        updateGrandTotal();
+    }
+
+    const STORE_LAT = 10.792222; // Toạ độ cửa hàng: Vĩnh Lộc B, Bình Chánh
+    const STORE_LON = 106.563056;
+
+    function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+        const R = 6371; 
+        const dLat = (lat2-lat1) * (Math.PI/180);  
+        const dLon = (lon2-lon1) * (Math.PI/180); 
+        const a = 
+            Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * (Math.PI/180)) * Math.cos(lat2 * (Math.PI/180)) * 
+            Math.sin(dLon/2) * Math.sin(dLon/2); 
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+        return R * c; 
+    }
+
+    let calculationTimeout = null;
+
+    async function loadProvinces() {
+        try {
+            const res = await fetch('https://provinces.open-api.vn/api/');
+            const data = await res.json();
+            const provinceSelect = document.getElementById('provinceSelect');
+            provinceSelect.innerHTML = '<option value="">Tỉnh thành</option>';
+            data.forEach(item => {
+                provinceSelect.innerHTML += `<option value="${item.code}" data-name="${item.name}">${item.name}</option>`;
+            });
+        } catch (e) {
+            console.error('Error fetching provinces:', e);
+        }
+    }
+
+    async function onProvinceChange() {
+        const provinceSelect = document.getElementById('provinceSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+        const provinceCode = provinceSelect.value;
+        
+        districtSelect.innerHTML = '<option value="">Quận huyện</option>';
+        wardSelect.innerHTML = '<option value="">Phường xã</option>';
+        
+        if(provinceCode) {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/p/${provinceCode}?depth=2`);
+                const data = await res.json();
+                data.districts.forEach(item => {
+                    districtSelect.innerHTML += `<option value="${item.code}" data-name="${item.name}">${item.name}</option>`;
+                });
+            } catch(e) {}
+        }
+        autoCalculateDistance();
+    }
+
+    async function onDistrictChange() {
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+        const districtCode = districtSelect.value;
+        
+        wardSelect.innerHTML = '<option value="">Phường xã</option>';
+        
+        if(districtCode) {
+            try {
+                const res = await fetch(`https://provinces.open-api.vn/api/d/${districtCode}?depth=2`);
+                const data = await res.json();
+                data.wards.forEach(item => {
+                    wardSelect.innerHTML += `<option value="${item.code}" data-name="${item.name}">${item.name}</option>`;
+                });
+            } catch(e) {}
+        }
+        autoCalculateDistance();
+    }
+
+    function autoCalculateDistance() {
+        const provinceSelect = document.getElementById('provinceSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const wardSelect = document.getElementById('wardSelect');
+        const addressInput = document.getElementById('addressInput');
+
+        const provinceOption = provinceSelect.options[provinceSelect.selectedIndex];
+        const provinceName = provinceOption ? (provinceOption.getAttribute('data-name') || '') : '';
+        const isHCM = provinceName.includes('Hồ Chí Minh');
+        const isHN = provinceName.includes('Hà Nội');
+
+        if (isHCM) {
+            document.getElementById('distanceContainer').classList.remove('hidden');
+            document.getElementById('distanceErrorMsg').classList.add('hidden');
+            
+            const address = addressInput ? addressInput.value.trim() : '';
+            const districtOption = districtSelect.options[districtSelect.selectedIndex];
+            const districtName = districtOption ? (districtOption.getAttribute('data-name') || '') : '';
+            const wardOption = wardSelect.options[wardSelect.selectedIndex];
+            const wardName = wardOption ? (wardOption.getAttribute('data-name') || '') : '';
+            
+            if(address && districtName && wardName) {
+                document.getElementById('distanceInput').value = 'Đang tính khoảng cách giao hàng...';
+                const fullAddress = `${address}, ${wardName}, ${districtName}, Hồ Chí Minh, Việt Nam`;
+                
+                clearTimeout(calculationTimeout);
+                calculationTimeout = setTimeout(() => {
+                    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(fullAddress)}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if(data && data.length > 0) {
+                                const lat = parseFloat(data[0].lat);
+                                const lon = parseFloat(data[0].lon);
+                                let distance = getDistanceFromLatLonInKm(STORE_LAT, STORE_LON, lat, lon) * 1.3;
+                                distance = Math.round(distance * 10) / 10;
+                                document.getElementById('distanceInput').value = `${distance} km`;
+                                applyShippingFee(distance, 'HCM');
+                            } else {
+                                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(districtName + ', Hồ Chí Minh, Việt Nam')}`)
+                                    .then(res => res.json())
+                                    .then(data2 => {
+                                        if(data2 && data2.length > 0) {
+                                            const lat = parseFloat(data2[0].lat);
+                                            const lon = parseFloat(data2[0].lon);
+                                            let distance = getDistanceFromLatLonInKm(STORE_LAT, STORE_LON, lat, lon) * 1.3;
+                                            distance = Math.round(distance * 10) / 10;
+                                            document.getElementById('distanceInput').value = `${distance} km (Ước tính theo quận)`;
+                                            applyShippingFee(distance, 'HCM');
+                                        } else {
+                                            showError();
+                                        }
+                                    }).catch(showError);
+                            }
+                        }).catch(showError);
+                }, 800); 
+            } else {
+                 document.getElementById('distanceInput').value = 'Vui lòng nhập đầy đủ địa chỉ để tính phí';
+                 applyShippingFee(0, 'HCM');
+            }
+        } else {
+            document.getElementById('distanceContainer').classList.add('hidden');
+            const provinceType = isHN ? 'HN' : (provinceName ? 'OTHER' : '');
+            applyShippingFee(null, provinceType);
+        }
+    }
+
+    function showError() {
+        document.getElementById('distanceErrorMsg').classList.remove('hidden');
+        document.getElementById('distanceInput').value = '';
+        applyShippingFee(4); // Mặc định 4km ~ 20k nếu lỗi
+    }
+
+    function applyShippingFee(distance, provinceType = 'HCM') {
+        const container = document.getElementById('shippingMethodContainer');
+        const label = document.getElementById('shippingFeeLabel');
+        
+        if (provinceType === 'HCM') {
+            if (distance > 0) {
+                currentShippingFee = Math.round(distance * 5); 
+                container.innerHTML = `Giao hàng (Hồ Chí Minh) - ${distance}km - <span class="font-bold">${currentShippingFee}.000đ</span>`;
+                label.innerText = `${currentShippingFee}.000đ`;
+            } else {
+                currentShippingFee = 0;
+                container.innerHTML = 'Vui lòng nhập đầy đủ địa chỉ để hiển thị phí vận chuyển.';
+                label.innerText = 'Chưa xác định';
+            }
+        } else if (provinceType === 'HN') {
+            currentShippingFee = 30;
+            container.innerHTML = 'Giao hàng tiêu chuẩn (Hà Nội) - <span class="font-bold">30.000đ</span>';
+            label.innerText = '30.000đ';
+        } else if (provinceType === 'OTHER') {
+            currentShippingFee = 40;
+            container.innerHTML = 'Giao hàng tiêu chuẩn (Tỉnh thành khác) - <span class="font-bold">40.000đ</span>';
+            label.innerText = '40.000đ';
+        } else {
+            currentShippingFee = 0;
+            container.innerHTML = 'Vui lòng chọn Tỉnh thành để hiển thị phương thức vận chuyển.';
+            label.innerText = 'Chưa xác định';
+        }
+        
+        updateGrandTotal();
+    }
+
+    function updateGrandTotal() {
+        if (cart.length === 0) return;
+        const grandTotal = currentSubtotal + currentShippingFee;
+        document.getElementById('checkoutGrandTotal').innerText = `${grandTotal}.000đ`;
     }
 
     function handleCheckout(event) {
@@ -207,6 +388,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         renderCheckoutPage();
+        loadProvinces();
     });
 </script>
 @endsection
