@@ -21,9 +21,16 @@ class AuthController extends Controller
         $fieldType = filter_var($loginField, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
         if (Auth::attempt([$fieldType => $loginField, 'password' => $password])) {
-            $request->session()->regenerate();
-            return redirect()->intended('/');
-        }
+        
+        // Bảo mật session
+        $request->session()->regenerate();
+
+        // Lấy tên quyền (role) của người dùng vừa đăng nhập
+        $userRole = Auth::user()->roleRelation->name ?? '';
+
+        // Tất cả đều chuyển về trang chủ, admin sẽ thấy nút Dashboard trên header
+        return redirect('/');
+    }
 
         return back()->withErrors([
             'login_field' => 'Email/Số điện thoại hoặc mật khẩu không chính xác.',

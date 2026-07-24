@@ -11,9 +11,9 @@ class User extends Authenticatable
 
     protected $fillable = ['name', 'email', 'password', 'phone', 'avatar', 'role_id', 'status'];
 
-    public function role()
+    public function roleRelation()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function shippingAddresses()
@@ -45,4 +45,23 @@ class User extends Authenticatable
     {
         return $this->hasMany(Notification::class);
     }
+
+    // Kiểm tra xem có phải Admin không
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    // Kiểm tra xem có phải Nhân viên không
+    public function isStaff()
+    {
+        return $this->role === 'staff';
+    }
+
+    // Kiểm tra xem có phải Admin HOẶC Nhân viên không (Để cho phép vào trang Dashboard)
+    public function hasAdminAccess()
+    {
+        return in_array($this->role, ['admin', 'staff']);
+    }
+
 }

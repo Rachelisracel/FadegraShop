@@ -10,29 +10,43 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::table('users')->insert([
+        DB::table('users')->updateOrInsert(
+            ['email' => 'adminfadegra@gmail.com'],
             [
-                'name' => 'Quản Trị Viên',
-                'email' => 'admin@fadegra.com',
+                'name' => 'Admin',
                 'password' => Hash::make('12345678'),
-                'phone' => '0909123456',
+                'phone' => '0967455398',
                 'avatar' => 'admin.jpg',
-                'role_id' => 1, // role_id = 1 là admin
+                'role_id' => 1,
                 'status' => 'active',
-                'created_at' => now(),
                 'updated_at' => now(),
-            ],
+            ]
+        );
+
+        DB::table('users')->updateOrInsert(
+            ['email' => 'stafffadegra@gmail.com'],
             [
-                'name' => 'Khách Hàng Mẫu',
-                'email' => 'customer@fadegra.com',
+                'name' => 'Nhân Viên',
+                'password' => Hash::make('12345678'),
+                'phone' => '0977777777',
+                'avatar' => 'staff.jpg',
+                'role_id' => 2,
+                'status' => 'active',
+                'updated_at' => now(),
+            ]
+        );
+
+        DB::table('users')->updateOrInsert(
+            ['email' => 'customerfadegra@gmail.com'],
+            [
+                'name' => 'Khách Hàng',
                 'password' => Hash::make('12345678'),
                 'phone' => '0988888888',
                 'avatar' => 'customer.jpg',
-                'role_id' => 3, // role_id = 3 là customer
+                'role_id' => 3,
                 'status' => 'active',
-                'created_at' => now(),
                 'updated_at' => now(),
-            ],
-        ]);
+            ]
+        );
     }
 }

@@ -27,13 +27,14 @@
                     fontFamily: {
                         serif: ['Playfair Display', 'serif'],
                         sans: ['DM Sans', 'sans-serif'],
+                        cinzel: ['"Cinzel Decorative"', 'serif'],
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600;700&family=Cinzel+Decorative:wght@400;700;900&display=swap');
         
 
 

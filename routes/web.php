@@ -19,7 +19,6 @@ Route::get('/cart', function () {
 })->name('cart');
 
 
-
 //trang thanh toan
 Route::get('/checkout', function () {
     return view('clients.pages.checkout');
@@ -42,22 +41,25 @@ Route::get('/forgot-password', function () {
     return view('clients.pages.forgot-password');
 })->name('forgot-password');
 
+//trang tim kiem sp
+Route::get('/search', function () {
+    return view('clients.pages.search');
+})->name('search');
+
 
 //trang admin 
 // Route cho phần Admin
-Route::prefix('admin')->group(function () {
+
+Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function () {
     
-    // Quản lý người dùng
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'edit']);
-
-    // Quản lý sản phẩm
-    Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['create', 'show', 'edit']);
-
-    // Quản lý đơn hàng
+   
+    // trang chung 
+    // Quản lý đơn hàng (Staff cần vào để duyệt đơn)
     Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
 
-    ////trang dashbroad
+    // Trang Dashboard
     Route::get('/dashboard', function () {
+        
         $today = \Carbon\Carbon::today();
         $thisMonth = \Carbon\Carbon::now()->month;
         $thisYear = \Carbon\Carbon::now()->year;
@@ -70,7 +72,30 @@ Route::prefix('admin')->group(function () {
 
         return view('admin.pages.dashboard', compact('dailyRevenue', 'monthlyRevenue', 'dailyOrders', 'monthlyOrders')); 
     });
-    // Sau này bạn có thể thêm các route khác của admin ở đây
-    // Route::get('/dashboard', ...);
-    // Route::get('/orders', ...);
+
+
+    // chi admin moi dc vo
+    Route::middleware(['role:admin'])->group(function () {
+        
+        // Quản lý người dùng (Staff không được quyền xem/xóa tài khoản)
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'edit']);
+
+        // Quản lý sản phẩm (Tránh việc Staff lỡ tay xóa mất sản phẩm)
+        Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['create', 'show', 'edit']);
+        
+    });
+
 });
+
+//Khach hang chưa đăng nhập 
+Route::get('/', function () { return view('clients.pages.home'); });
+Route::get('/menu', function () { return view('clients.pages.menu'); });
+
+// Khach hang đã đăng nhập
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart', function () { return view('clients.pages.cart'); });
+    Route::get('/checkout', function () { return view('clients.pages.checkout'); });
+    // Trang profile, lịch sử đơn hàng...
+});
+
+

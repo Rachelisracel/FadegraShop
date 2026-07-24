@@ -17,13 +17,13 @@ return new class extends Migration
             $table->string('email', 100)->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            
-            
             $table->string('phone', 20)->nullable();
             $table->string('avatar')->nullable();
             $table->foreignId('role_id')->nullable()->constrained('roles')->nullOnDelete();
             $table->string('status', 20)->default('active');
             
+            // Thêm cột role: Mặc định ai đăng ký cũng là 'customer'
+            $table->enum('role', ['admin', 'staff', 'customer'])->default('customer');
             $table->rememberToken();
             $table->timestamps();
         });
@@ -42,6 +42,9 @@ return new class extends Migration
             $table->longText('payload');
             $table->integer('last_activity')->index();
         });
+
+
+
     }
     
     /**

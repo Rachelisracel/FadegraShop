@@ -85,7 +85,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            @php $roleName = $user->role ? $user->role->name : 'Khách hàng'; @endphp
+                            @php $roleName = $user->roleRelation ? $user->roleRelation->name : 'Khách hàng'; @endphp
                             <span class="text-xs font-medium px-2.5 py-1 rounded-md {{ $roleName === 'Admin' ? 'bg-purple-100 text-purple-700' : ($roleName === 'Nhân viên' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600') }}">
                                 {{ $roleName }}
                             </span>
