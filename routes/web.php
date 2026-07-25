@@ -35,6 +35,7 @@ Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])-
 Route::get('/register', function () {
     return view('clients.pages.register');
 })->name('register');
+Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])->name('register.post');
 
 // Trang quen mat khau
 Route::get('/forgot-password', function () {
@@ -99,3 +100,5 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
+Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');

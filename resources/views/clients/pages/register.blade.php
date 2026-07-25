@@ -18,6 +18,7 @@
     </div>
 
     <!-- Nửa trái: Form Đăng ký -->
+    <!-- Nửa trái: Form Đăng ký -->
     <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12">
         <div class="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-black/5">
             
@@ -26,47 +27,51 @@
                 <p class="text-gray-500 text-sm">Tạo tài khoản mới hoàn toàn miễn phí</p>
             </div>
 
-            <form action="#" method="POST" class="space-y-4">
+            <form action="{{ route('register.post') }}" method="POST" class="space-y-4" autocomplete="off">
                 @csrf
+                
                 <!-- Họ Tên -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Họ và tên</label>
-                    <input type="text" name="name" required placeholder="Nhập họ tên của bạn..." 
+                    <input type="text" name="name" value="{{ old('name') }}" required autocomplete="off" placeholder="Nhập họ tên của bạn..." 
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] focus:ring-1 focus:ring-[#354A3D] transition">
+                    @error('name') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Email -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
-                    <input type="email" name="email" required placeholder="Nhập địa chỉ email..." 
+                    <input type="email" name="email" value="{{ old('email') }}" required autocomplete="off" placeholder="Nhập địa chỉ email..." 
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] focus:ring-1 focus:ring-[#354A3D] transition">
+                    @error('email') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Số điện thoại -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Số điện thoại</label>
-                    <input type="tel" name="phone" required placeholder="Nhập số điện thoại của bạn..." 
+                    <input type="tel" name="phone" value="{{ old('phone') }}" required autocomplete="off" placeholder="Nhập số điện thoại của bạn..." 
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] focus:ring-1 focus:ring-[#354A3D] transition">
+                    @error('phone') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Mật khẩu -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Mật khẩu</label>
-                    <input type="password" name="password" required placeholder="Tạo mật khẩu (Ít nhất 6 ký tự)" 
+                    <input type="password" name="password" minlength="6" required autocomplete="new-password" placeholder="Tạo mật khẩu (Ít nhất 6 ký tự)" 
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] focus:ring-1 focus:ring-[#354A3D] transition">
+                    @error('password') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <!-- Xác nhận mật khẩu -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-1.5">Xác nhận mật khẩu</label>
-                    <input type="password" name="password_confirmation" required placeholder="Nhập lại mật khẩu..." 
+                    <input type="password" name="password_confirmation" minlength="6" required autocomplete="new-password" placeholder="Nhập lại mật khẩu..." 
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] focus:ring-1 focus:ring-[#354A3D] transition">
                 </div>
 
                 <!-- Nút Submit -->
                 <button type="submit" class="w-full bg-[#354A3D] text-white font-bold rounded-xl py-3.5 mt-6 shadow-md hover:bg-[#2A4435] transition-colors flex justify-center items-center gap-2">
                     Tạo tài khoản
-                    <!--<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /></svg>-->
                 </button>
             </form>
 
