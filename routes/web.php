@@ -102,3 +102,22 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
 Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+
+// Route GET để hiển thị giao diện nhập email
+Route::get('/forgot-password', [\App\Http\Controllers\AuthController::class, 'forgotPassword'])->name('forgot-password');
+// Route POST để xử lý dữ liệu khi người dùng bấm nút "Gửi mã OTP"
+Route::post('/forgot-password', [\App\Http\Controllers\AuthController::class, 'sendOtp'])->name('forgot-password.post');
+
+// Route hiển thị form nhập mã OTP
+Route::get('/verify-otp', [\App\Http\Controllers\AuthController::class, 'showVerifyOtp'])->name('verify-otp');
+// Route xử lý khi người dùng bấm "Xác nhận OTP" (Mình khai báo sẵn luôn cho bước sau)
+Route::post('/verify-otp', [\App\Http\Controllers\AuthController::class, 'processVerifyOtp'])->name('verify-otp.post');
+
+// Route hiển thị form đổi mật khẩu mới
+Route::get('/reset-password', [\App\Http\Controllers\AuthController::class, 'showResetPassword'])->name('reset-password');
+
+// Route xử lý việc lưu mật khẩu vào Database
+Route::post('/reset-password', [\App\Http\Controllers\AuthController::class, 'processResetPassword'])->name('reset-password.post');
+
+// Route xử lý việc Gửi lại mã OTP
+Route::post('/resend-otp', [\App\Http\Controllers\AuthController::class, 'resendOtp'])->name('resend-otp.post');
