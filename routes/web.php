@@ -1,0 +1,144 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+
+
+// trang home
+Route::get('/', function () {
+    return view('clients.pages.home');
+});
+
+// trang menu
+Route::get('/menu', function () {
+    return view('clients.pages.menu');
+})->name('menu');
+
+// trang gio hang
+Route::get('/cart', function () {
+    return view('clients.pages.cart');
+})->name('cart');
+
+
+//trang thanh toan
+Route::get('/checkout', function () {
+    return view('clients.pages.checkout');
+})->name('checkout');
+
+// Trang dang nhap
+Route::get('/login', function () {
+    return view('clients.pages.login');
+})->name('login');
+Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+
+// Trang dang ky
+Route::get('/register', function () {
+    return view('clients.pages.register');
+})->name('register');
+Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])->name('register.post');
+
+// Trang quen mat khau
+Route::get('/forgot-password', function () {
+    return view('clients.pages.forgot-password');
+})->name('forgot-password');
+
+//trang tim kiem sp
+Route::get('/search', function () {
+    return view('clients.pages.search');
+})->name('search');
+
+
+//trang admin 
+// Route cho phần Admin
+
+Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function () {
+
+
+    // trang chung 
+    // Quản lý đơn hàng (Staff cần vào để duyệt đơn)
+    Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update'])->names('admin.orders');
+
+    // Trang Dashboard
+    Route::get('/dashboard', function () {
+
+        $today = \Carbon\Carbon::today();
+        $thisMonth = \Carbon\Carbon::now()->month;
+        $thisYear = \Carbon\Carbon::now()->year;
+
+        $dailyRevenue = \App\Models\Order::whereDate('created_at', $today)->sum('total_price');
+        $monthlyRevenue = \App\Models\Order::whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->sum('total_price');
+
+        $dailyOrders = \App\Models\Order::whereDate('created_at', $today)->count();
+        $monthlyOrders = \App\Models\Order::whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->count();
+
+        return view('admin.pages.dashboard', compact('dailyRevenue', 'monthlyRevenue', 'dailyOrders', 'monthlyOrders'));
+    });
+
+
+    // chi admin moi dc vo
+    Route::middleware(['role:admin'])->group(function () {
+
+        // Quản lý người dùng (Staff không được quyền xem/xóa tài khoản)
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'edit']);
+
+        // Quản lý sản phẩm (Tránh việc Staff lỡ tay xóa mất sản phẩm)
+        Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['create', 'show', 'edit']);
+    });
+});
+
+//Khach hang chưa đăng nhập 
+Route::get('/', function () {
+    return view('clients.pages.home');
+});
+Route::get('/menu', function () {
+    return view('clients.pages.menu');
+});
+
+// Khach hang đã đăng nhập
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart', function () {
+        return view('clients.pages.cart');
+    });
+    Route::get('/checkout', function () {
+        return view('clients.pages.checkout');
+    });
+    // Trang profile, lịch sử đơn hàng...
+});
+
+
+// Lịch sử đơn hàng - tra cứu bằng tài khoản
+Route::middleware(['auth'])->group(function () {
+    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+});
+
+// Lịch sử đơn hàng - tra cứu bằng mã đơn + số điện thoại (khách vãng lai)
+Route::get('/orders/lookup', [\App\Http\Controllers\OrderController::class, 'lookupForm'])->name('orders.lookup.form');
+Route::post('/orders/lookup', [\App\Http\Controllers\OrderController::class, 'lookup'])->name('orders.lookup');
+
+// Chi tiết đơn hàng & các thao tác (quyền xem được kiểm tra bên trong controller)
+Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+Route::post('/orders/{order}/cancel', [\App\Http\Controllers\OrderController::class, 'cancel'])->name('orders.cancel');
+Route::post('/orders/{order}/reorder', [\App\Http\Controllers\OrderController::class, 'reorder'])->name('orders.reorder');
+Route::post('/orders/{order}/review', [\App\Http\Controllers\OrderController::class, 'review'])->name('orders.review');
+
+Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
+
+// Route GET để hiển thị giao diện nhập email
+Route::get('/forgot-password', [\App\Http\Controllers\AuthController::class, 'forgotPassword'])->name('forgot-password');
+// Route POST để xử lý dữ liệu khi người dùng bấm nút "Gửi mã OTP"
+Route::post('/forgot-password', [\App\Http\Controllers\AuthController::class, 'sendOtp'])->name('forgot-password.post');
+
+// Route hiển thị form nhập mã OTP
+Route::get('/verify-otp', [\App\Http\Controllers\AuthController::class, 'showVerifyOtp'])->name('verify-otp');
+// Route xử lý khi người dùng bấm "Xác nhận OTP" (Mình khai báo sẵn luôn cho bước sau)
+Route::post('/verify-otp', [\App\Http\Controllers\AuthController::class, 'processVerifyOtp'])->name('verify-otp.post');
+
+// Route hiển thị form đổi mật khẩu mới
+Route::get('/reset-password', [\App\Http\Controllers\AuthController::class, 'showResetPassword'])->name('reset-password');
+
+// Route xử lý việc lưu mật khẩu vào Database
+Route::post('/reset-password', [\App\Http\Controllers\AuthController::class, 'processResetPassword'])->name('reset-password.post');
+
+// Route xử lý việc Gửi lại mã OTP
+Route::post('/resend-otp', [\App\Http\Controllers\AuthController::class, 'resendOtp'])->name('resend-otp.post');
