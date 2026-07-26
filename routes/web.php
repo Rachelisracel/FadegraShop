@@ -1,66 +1,54 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactController;
 
 
-// trang home
-Route::get('/', function () {
-    return view('clients.pages.home');
-});
+// ==========================================
+// 1. CÁC TRANG CƠ BẢN
+// ==========================================
+Route::get('/', function () { return view('clients.pages.home'); })->name('home');
+Route::get('/menu', function () { return view('clients.pages.menu'); })->name('menu');
+Route::get('/search', function () { return view('clients.pages.search'); })->name('search');
 
-// trang menu
-Route::get('/menu', function () {
-    return view('clients.pages.menu');
-})->name('menu');
+Route::get('/contact', [ContactController::class, 'index'])->name('contact.index');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
-// trang gio hang
-Route::get('/cart', function () {
-    return view('clients.pages.cart'); 
-})->name('cart');
+// ==========================================
+// 2. GIỎ HÀNG & THANH TOÁN
+// ==========================================
+Route::get('/cart', function () { return view('clients.pages.cart'); })->name('cart');
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.post');
 
+// ==========================================
+// 3. XÁC THỰC (ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU)
+// ==========================================
+Route::get('/login', function () { return view('clients.pages.login'); })->name('login');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-//trang thanh toan
-Route::get('/checkout', function () {
-    return view('clients.pages.checkout');
-})->name('checkout');
+Route::get('/register', function () { return view('clients.pages.register'); })->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
 
-// Trang dang nhap
-Route::get('/login', function () {
-    return view('clients.pages.login');
-})->name('login');
-Route::post('/login', [\App\Http\Controllers\AuthController::class, 'login'])->name('login.post');
-Route::post('/logout', [\App\Http\Controllers\AuthController::class, 'logout'])->name('logout');
+// Luồng Quên mật khẩu & OTP
+Route::get('/forgot-password', [AuthController::class, 'forgotPassword'])->name('forgot-password');
+Route::post('/forgot-password', [AuthController::class, 'sendOtp'])->name('forgot-password.post');
 
-// Trang dang ky
-Route::get('/register', function () {
-    return view('clients.pages.register');
-})->name('register');
-Route::post('/register', [\App\Http\Controllers\AuthController::class, 'register'])->name('register.post');
+Route::get('/verify-otp', [AuthController::class, 'showVerifyOtp'])->name('verify-otp');
+Route::post('/verify-otp', [AuthController::class, 'processVerifyOtp'])->name('verify-otp.post');
+Route::post('/resend-otp', [AuthController::class, 'resendOtp'])->name('resend-otp.post');
 
-// Trang quen mat khau
-Route::get('/forgot-password', function () {
-    return view('clients.pages.forgot-password');
-})->name('forgot-password');
+Route::get('/reset-password', [AuthController::class, 'showResetPassword'])->name('reset-password');
+Route::post('/reset-password', [AuthController::class, 'processResetPassword'])->name('reset-password.post');
 
-//trang tim kiem sp
-Route::get('/search', function () {
-    return view('clients.pages.search');
-})->name('search');
-
-
-//trang admin 
-// Route cho phần Admin
-
+// ==========================================
+// 4. TRANG QUẢN TRỊ ADMIN / STAFF
+// ==========================================
 Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function () {
-    
-   
-    // trang chung 
-    // Quản lý đơn hàng (Staff cần vào để duyệt đơn)
-    Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
-
-    // Trang Dashboard
     Route::get('/dashboard', function () {
-        
         $today = \Carbon\Carbon::today();
         $thisMonth = \Carbon\Carbon::now()->month;
         $thisYear = \Carbon\Carbon::now()->year;
@@ -74,50 +62,10 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function
         return view('admin.pages.dashboard', compact('dailyRevenue', 'monthlyRevenue', 'dailyOrders', 'monthlyOrders')); 
     });
 
+    Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
 
-    // chi admin moi dc vo
     Route::middleware(['role:admin'])->group(function () {
-        
-        // Quản lý người dùng (Staff không được quyền xem/xóa tài khoản)
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'edit']);
-
-        // Quản lý sản phẩm (Tránh việc Staff lỡ tay xóa mất sản phẩm)
         Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['create', 'show', 'edit']);
-        
     });
-
 });
-
-//Khach hang chưa đăng nhập 
-Route::get('/', function () { return view('clients.pages.home'); });
-Route::get('/menu', function () { return view('clients.pages.menu'); });
-
-// Khach hang đã đăng nhập
-Route::middleware(['auth'])->group(function () {
-    Route::get('/cart', function () { return view('clients.pages.cart'); });
-    Route::get('/checkout', function () { return view('clients.pages.checkout'); });
-    // Trang profile, lịch sử đơn hàng...
-});
-
-
-Route::get('/contact', [\App\Http\Controllers\ContactController::class, 'index'])->name('contact.index');
-Route::post('/contact', [\App\Http\Controllers\ContactController::class, 'store'])->name('contact.store');
-
-// Route GET để hiển thị giao diện nhập email
-Route::get('/forgot-password', [\App\Http\Controllers\AuthController::class, 'forgotPassword'])->name('forgot-password');
-// Route POST để xử lý dữ liệu khi người dùng bấm nút "Gửi mã OTP"
-Route::post('/forgot-password', [\App\Http\Controllers\AuthController::class, 'sendOtp'])->name('forgot-password.post');
-
-// Route hiển thị form nhập mã OTP
-Route::get('/verify-otp', [\App\Http\Controllers\AuthController::class, 'showVerifyOtp'])->name('verify-otp');
-// Route xử lý khi người dùng bấm "Xác nhận OTP" (Mình khai báo sẵn luôn cho bước sau)
-Route::post('/verify-otp', [\App\Http\Controllers\AuthController::class, 'processVerifyOtp'])->name('verify-otp.post');
-
-// Route hiển thị form đổi mật khẩu mới
-Route::get('/reset-password', [\App\Http\Controllers\AuthController::class, 'showResetPassword'])->name('reset-password');
-
-// Route xử lý việc lưu mật khẩu vào Database
-Route::post('/reset-password', [\App\Http\Controllers\AuthController::class, 'processResetPassword'])->name('reset-password.post');
-
-// Route xử lý việc Gửi lại mã OTP
-Route::post('/resend-otp', [\App\Http\Controllers\AuthController::class, 'resendOtp'])->name('resend-otp.post');

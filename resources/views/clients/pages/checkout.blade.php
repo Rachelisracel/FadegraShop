@@ -6,40 +6,51 @@
 <div class="bg-[#F8F6F2] min-h-screen font-sans py-8 md:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         
-        <!-- LOGO / TIÊU ĐỀ THƯƠNG HIỆU -->
         <div class="mb-8">
             <h1 class="font-serif text-3xl font-bold text-[#354A3D] tracking-wide">Fadegra®</h1>
         </div>
 
-        <form onsubmit="handleCheckout(event)" class="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
+        <!-- HIỆN THÔNG BÁO LỖI NẾU CÓ -->
+        @if($errors->any())
+            <div class="mb-5 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl">
+                {{ $errors->first() }}
+            </div>
+        @endif
+
+        <form id="checkoutForm" action="{{ route('checkout.post') }}" method="POST" class="lg:grid lg:grid-cols-12 lg:gap-12 items-start">
+            @csrf
             
-            <!-- CỘT TRÁI: THÔNG TIN GIAO HÀNG & THANH TOÁN -->
+            <!-- INPUT ẨN ĐỂ CHUYỂN GIỎ HÀNG, PHÍ SHIP VÀ ĐỊA CHỈ TỪ JS LÊN PHP -->
+            <input type="hidden" name="cart_data" id="cartDataInput">
+            <input type="hidden" name="shipping_fee" id="shippingFeeInput" value="0">
+            <input type="hidden" name="address" id="finalAddressInput">
+
+            <!-- CỘT TRÁI -->
             <div class="lg:col-span-7 space-y-8">
                 
-                <!-- 1. Thông tin nhận hàng -->
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-black/5 space-y-5">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="font-serif text-xl font-bold text-[#1F2937]">Thông tin nhận hàng</h2>
-                        <a href="#" class="text-sm text-[#354A3D] font-medium hover:underline flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
-                            Đăng nhập
-                        </a>
                     </div>
 
                     <div>
-                        <input type="email" required placeholder="Email" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
+                        <input type="email" name="email" required placeholder="Email" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
                     </div>
                     <div>
-                        <input type="text" required placeholder="Họ và tên" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
+                        <input type="text" name="name" required placeholder="Họ và tên" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
                     </div>
                     <div class="relative">
-                        <input type="tel" required placeholder="Số điện thoại" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-16 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
-                        <div class="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 bg-gray-100 px-2 py-1 rounded text-xs font-medium text-gray-600">
-                            🇻🇳 ▾
-                        </div>
+                        <input type="tel" name="phone" required placeholder="Số điện thoại" class="w-full bg-gray-50 border border-gray-200 rounded-xl pl-4 pr-16 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
                     </div>
-                    <div>
-                        <input type="text" id="addressInput" onblur="autoCalculateDistance()" required placeholder="Địa chỉ (Ví dụ: 123 Nguyễn Huệ)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
+                    
+                    <!-- ĐÃ SỬA: Tách địa chỉ thành Số nhà và Tên đường -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <input type="text" id="streetInput" onblur="autoCalculateDistance()" required placeholder="Tên đường (VD: Nguyễn Huệ)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
+                        </div>
+                        <div>
+                            <input type="text" id="houseNumberInput" onblur="autoCalculateDistance()" required placeholder="Số nhà, hẻm (VD: 123/4)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition">
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -58,13 +69,11 @@
                         <input type="text" id="distanceInput" readonly placeholder="Hệ thống đang tính khoảng cách giao hàng..." class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition text-gray-500 bg-gray-100">
                         <p id="distanceErrorMsg" class="text-xs text-red-500 mt-1 hidden">Không thể tự động tính khoảng cách, hệ thống sẽ sử dụng mức phí mặc định.</p>
                     </div>
-
                     <div>
-                        <textarea rows="2" placeholder="Ghi chú (tuỳ chọn)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition"></textarea>
+                        <textarea name="note" rows="2" placeholder="Ghi chú (tuỳ chọn)" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#354A3D] transition"></textarea>
                     </div>
                 </div>
 
-                <!-- 2. Vận chuyển -->
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-black/5 space-y-4">
                     <h2 class="font-serif text-xl font-bold text-[#1F2937]">Vận chuyển</h2>
                     <div id="shippingMethodContainer" class="bg-[#EBF3F0] border border-[#354A3D]/20 text-[#354A3D] p-4 rounded-xl text-sm font-medium">
@@ -72,12 +81,11 @@
                     </div>
                 </div>
 
-                <!-- 3. Thanh toán -->
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-black/5 space-y-4">
                     <h2 class="font-serif text-xl font-bold text-[#1F2937]">Thanh toán</h2>
                     <label class="flex items-center justify-between p-4 rounded-xl border border-[#354A3D] bg-[#354A3D]/5 cursor-pointer">
                         <div class="flex items-center gap-3">
-                            <input type="radio" checked name="payment" class="w-4 h-4 text-[#354A3D] accent-[#354A3D]">
+                            <input type="radio" checked name="payment_method" value="cod" class="w-4 h-4 text-[#354A3D] accent-[#354A3D]">
                             <span class="text-sm font-bold text-[#1F2937]">Thanh toán khi giao hàng (COD)</span>
                         </div>
                         <span class="text-xl">💵</span>
@@ -85,26 +93,12 @@
                 </div>
             </div>
 
-            <!-- CỘT PHẢI: TÓM TẮT ĐƠN HÀNG (DỮ LIỆU TỰ ĐỘNG ĐỌC TỪ LOCALSTORAGE) -->
+            <!-- CỘT PHẢI -->
             <div class="lg:col-span-5 mt-8 lg:mt-0">
                 <div class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-black/5 sticky top-8 space-y-6">
+                    <h2 id="orderSummaryTitle" class="font-serif text-xl font-bold text-[#1F2937] border-b border-gray-100 pb-4">Đơn hàng</h2>
+                    <div id="checkoutItemsList" class="space-y-4 max-h-72 overflow-y-auto pr-2"></div>
                     
-                    <h2 id="orderSummaryTitle" class="font-serif text-xl font-bold text-[#1F2937] border-b border-gray-100 pb-4">
-                        Đơn hàng (0 sản phẩm)
-                    </h2>
-
-                    <!-- Danh sách sản phẩm render từ JS -->
-                    <div id="checkoutItemsList" class="space-y-4 max-h-72 overflow-y-auto pr-2">
-                        <!-- JS đổ dữ liệu vào đây -->
-                    </div>
-
-                    <!-- Ô nhập mã giảm giá -->
-                    <div class="flex gap-2 pt-2">
-                        <input type="text" placeholder="Nhập mã giảm giá" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#354A3D]">
-                        <button type="button" class="bg-[#354A3D]/10 text-[#354A3D] font-bold px-5 py-2.5 rounded-xl hover:bg-[#354A3D] hover:text-white transition">Áp dụng</button>
-                    </div>
-
-                    <!-- Chi tiết tiền -->
                     <div class="space-y-3 border-y border-gray-100 py-4 text-sm text-gray-600">
                         <div class="flex justify-between">
                             <span>Tạm tính</span>
@@ -116,36 +110,30 @@
                         </div>
                     </div>
 
-                    <!-- Tổng cộng -->
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-lg text-[#1F2937]">Tổng cộng</span>
                         <span id="checkoutGrandTotal" class="font-bold text-2xl text-[#354A3D]">0k</span>
                     </div>
 
-                    <!-- Nút hành động -->
                     <div class="flex items-center justify-between pt-2">
-                        <a href="{{ url('/cart') }}" class="text-sm font-bold text-[#354A3D] hover:underline flex items-center gap-1">
-                            ‹ Quay về giỏ hàng
-                        </a>
-                        <button type="submit" class="bg-[#354A3D] text-white font-bold px-8 py-4 rounded-xl shadow-md hover:bg-[#2A4435] transition-colors">
+                        <a href="{{ url('/cart') }}" class="text-sm font-bold text-[#354A3D] hover:underline flex items-center gap-1">‹ Quay về giỏ hàng</a>
+                        <button type="button" onclick="submitCheckout()" class="bg-[#354A3D] text-white font-bold px-8 py-4 rounded-xl shadow-md hover:bg-[#2A4435] transition-colors">
                             ĐẶT HÀNG
                         </button>
                     </div>
-
                 </div>
             </div>
-
         </form>
     </div>
 </div>
 
-<!-- JAVASCRIPT ĐỒNG BỘ GIỎ HÀNG VÀ XỬ LÝ ĐẶT HÀNG -->
 <script>
     let currentShippingFee = 0;
     let currentSubtotal = 0;
     let cart = JSON.parse(localStorage.getItem('fadegra_cart')) || [];
-
-    const formatPrice = (price) => `${price}.000đ`;
+    let calculationTimeout = null;
+    const STORE_LAT = 10.792222; 
+    const STORE_LON = 106.563056;
 
     function renderCheckoutPage() {
         const container = document.getElementById('checkoutItemsList');
@@ -155,8 +143,6 @@
         if (cart.length === 0) {
             container.innerHTML = `<p class="text-gray-400 text-sm text-center py-4">Chưa có sản phẩm nào trong đơn hàng.</p>`;
             document.getElementById('orderSummaryTitle').innerText = `Đơn hàng (0 sản phẩm)`;
-            document.getElementById('checkoutSubtotal').innerText = `0đ`;
-            document.getElementById('checkoutGrandTotal').innerText = `0đ`;
             return;
         }
 
@@ -164,11 +150,12 @@
         cart.forEach(item => {
             totalCount += item.quantity;
             currentSubtotal += item.totalPrice;
-
-            const toppingText = item.toppings.length > 0 ? `<br><span class="text-xs text-gray-400">+ ${item.toppings.join(', ')}</span>` : '';
+            
             const imageTag = item.image 
                 ? `<img src="{{ asset('images') }}/${item.image}" class="w-full h-full object-cover">`
                 : `<span class="text-2xl">🧋</span>`;
+                
+            const toppingText = (item.toppings && item.toppings.length > 0) ? `<br><span class="text-xs text-gray-400">+ ${item.toppings.join(', ')}</span>` : '';
 
             html += `
                 <div class="flex items-center justify-between gap-4">
@@ -186,15 +173,50 @@
                 </div>
             `;
         });
-
+        
         container.innerHTML = html;
         document.getElementById('orderSummaryTitle').innerText = `Đơn hàng (${totalCount} sản phẩm)`;
         document.getElementById('checkoutSubtotal').innerText = `${currentSubtotal}.000đ`;
         updateGrandTotal();
     }
 
-    const STORE_LAT = 10.792222; // Toạ độ cửa hàng: Vĩnh Lộc B, Bình Chánh
-    const STORE_LON = 106.563056;
+    function updateGrandTotal() {
+        const grandTotal = currentSubtotal + currentShippingFee;
+        document.getElementById('checkoutGrandTotal').innerText = `${grandTotal}.000đ`;
+    }
+
+    // ĐÃ SỬA: Hàm gom thông tin gửi đi
+    function submitCheckout() {
+        if(cart.length === 0) {
+            alert('Giỏ hàng của bạn đang trống!');
+            return;
+        }
+        
+        // Lấy tên đường, số nhà, phường, quận, tỉnh
+        const street = document.getElementById('streetInput').value.trim();
+        const houseNumber = document.getElementById('houseNumberInput').value.trim();
+        const wardSelect = document.getElementById('wardSelect');
+        const districtSelect = document.getElementById('districtSelect');
+        const provinceSelect = document.getElementById('provinceSelect');
+        
+        const ward = wardSelect.options[wardSelect.selectedIndex] ? wardSelect.options[wardSelect.selectedIndex].text : '';
+        const district = districtSelect.options[districtSelect.selectedIndex] ? districtSelect.options[districtSelect.selectedIndex].text : '';
+        const province = provinceSelect.options[provinceSelect.selectedIndex] ? provinceSelect.options[provinceSelect.selectedIndex].text : '';
+
+        // Kiểm tra khách đã nhập đủ chưa
+        if(!street || !houseNumber || !ward || !district || !province || ward === 'Phường xã' || district === 'Quận huyện' || province === 'TP HCM') {
+            alert('Vui lòng nhập đầy đủ Tên đường, Số nhà và chọn khu vực giao hàng!');
+            return;
+        }
+
+        // Gộp chuỗi địa chỉ đầy đủ
+        const finalAddress = `${houseNumber} ${street}, ${ward}, ${district}, ${province}`;
+        document.getElementById('finalAddressInput').value = finalAddress;
+
+        document.getElementById('cartDataInput').value = JSON.stringify(cart);
+        document.getElementById('shippingFeeInput').value = currentShippingFee * 1000; 
+        document.getElementById('checkoutForm').submit();
+    }
 
     function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
         const R = 6371; 
@@ -208,17 +230,22 @@
         return R * c; 
     }
 
-    let calculationTimeout = null;
-
     async function loadProvinces() {
         try {
             const res = await fetch('https://provinces.open-api.vn/api/');
             const data = await res.json();
             const provinceSelect = document.getElementById('provinceSelect');
-            provinceSelect.innerHTML = '<option value="">Tỉnh thành</option>';
+            provinceSelect.innerHTML = '';
+            
+            // Lọc chỉ lấy duy nhất Hồ Chí Minh
             data.forEach(item => {
-                provinceSelect.innerHTML += `<option value="${item.code}" data-name="${item.name}">${item.name}</option>`;
+                if(item.name.includes('Hồ Chí Minh')) {
+                    provinceSelect.innerHTML += `<option value="${item.code}" data-name="${item.name}" selected>${item.name}</option>`;
+                }
             });
+
+            // Tự động kích hoạt tải danh sách Quận/Huyện của TP.HCM luôn
+            onProvinceChange();
         } catch (e) {
             console.error('Error fetching provinces:', e);
         }
@@ -264,11 +291,15 @@
         autoCalculateDistance();
     }
 
+    // ĐÃ SỬA: Lấy địa chỉ từ 2 ô mới để tính map
     function autoCalculateDistance() {
         const provinceSelect = document.getElementById('provinceSelect');
         const districtSelect = document.getElementById('districtSelect');
         const wardSelect = document.getElementById('wardSelect');
-        const addressInput = document.getElementById('addressInput');
+        
+        const street = document.getElementById('streetInput') ? document.getElementById('streetInput').value.trim() : '';
+        const houseNumber = document.getElementById('houseNumberInput') ? document.getElementById('houseNumberInput').value.trim() : '';
+        const fullStreetAddress = (houseNumber + ' ' + street).trim();
 
         const provinceOption = provinceSelect.options[provinceSelect.selectedIndex];
         const provinceName = provinceOption ? (provinceOption.getAttribute('data-name') || '') : '';
@@ -279,15 +310,14 @@
             document.getElementById('distanceContainer').classList.remove('hidden');
             document.getElementById('distanceErrorMsg').classList.add('hidden');
             
-            const address = addressInput ? addressInput.value.trim() : '';
             const districtOption = districtSelect.options[districtSelect.selectedIndex];
             const districtName = districtOption ? (districtOption.getAttribute('data-name') || '') : '';
             const wardOption = wardSelect.options[wardSelect.selectedIndex];
             const wardName = wardOption ? (wardOption.getAttribute('data-name') || '') : '';
             
-            if(address && districtName && wardName) {
+            if(fullStreetAddress && districtName && wardName) {
                 document.getElementById('distanceInput').value = 'Đang tính khoảng cách giao hàng...';
-                const fullAddress = `${address}, ${wardName}, ${districtName}, Hồ Chí Minh, Việt Nam`;
+                const fullAddress = `${fullStreetAddress}, ${wardName}, ${districtName}, Hồ Chí Minh, Việt Nam`;
                 
                 clearTimeout(calculationTimeout);
                 calculationTimeout = setTimeout(() => {
@@ -333,7 +363,7 @@
     function showError() {
         document.getElementById('distanceErrorMsg').classList.remove('hidden');
         document.getElementById('distanceInput').value = '';
-        applyShippingFee(4); // Mặc định 4km ~ 20k nếu lỗi
+        applyShippingFee(4); 
     }
 
     function applyShippingFee(distance, provinceType = 'HCM') {
@@ -350,14 +380,6 @@
                 container.innerHTML = 'Vui lòng nhập đầy đủ địa chỉ để hiển thị phí vận chuyển.';
                 label.innerText = 'Chưa xác định';
             }
-        } else if (provinceType === 'HN') {
-            currentShippingFee = 30;
-            container.innerHTML = 'Giao hàng tiêu chuẩn (Hà Nội) - <span class="font-bold">30.000đ</span>';
-            label.innerText = '30.000đ';
-        } else if (provinceType === 'OTHER') {
-            currentShippingFee = 40;
-            container.innerHTML = 'Giao hàng tiêu chuẩn (Tỉnh thành khác) - <span class="font-bold">40.000đ</span>';
-            label.innerText = '40.000đ';
         } else {
             currentShippingFee = 0;
             container.innerHTML = 'Vui lòng chọn Tỉnh thành để hiển thị phương thức vận chuyển.';
@@ -367,28 +389,9 @@
         updateGrandTotal();
     }
 
-    function updateGrandTotal() {
-        if (cart.length === 0) return;
-        const grandTotal = currentSubtotal + currentShippingFee;
-        document.getElementById('checkoutGrandTotal').innerText = `${grandTotal}.000đ`;
-    }
-
-    function handleCheckout(event) {
-        event.preventDefault();
-        if(cart.length === 0) {
-            alert('Giỏ hàng của bạn đang trống!');
-            return;
-        }
-
-        alert('Đặt hàng thành công! Cảm ơn bạn đã ủng hộ Fadegra.');
-        // Xóa giỏ hàng sau khi đặt thành công
-        localStorage.removeItem('fadegra_cart');
-        window.location.href = "{{ url('/') }}";
-    }
-
     document.addEventListener("DOMContentLoaded", function() {
         renderCheckoutPage();
-        loadProvinces();
+        loadProvinces(); 
     });
 </script>
 @endsection
