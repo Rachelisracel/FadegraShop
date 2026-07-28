@@ -204,10 +204,11 @@
         const province = provinceSelect.options[provinceSelect.selectedIndex] ? provinceSelect.options[provinceSelect.selectedIndex].text : '';
 
         // Kiểm tra khách đã nhập đủ chưa
-        if(!street || !houseNumber || !ward || !district || !province || ward === 'Phường xã' || district === 'Quận huyện' || province === 'TP HCM') {
-            alert('Vui lòng nhập đầy đủ Tên đường, Số nhà và chọn khu vực giao hàng!');
+        if(!street || !houseNumber || !ward || !district || !province || ward === 'Phường xã' || district === 'Quận huyện' || province === 'Tỉnh thành') {
+            alert('Vui lòng nhập đầy đủ Tên đường, Số nhà, Phường xã và Quận huyện!');
             return;
         }
+
 
         // Gộp chuỗi địa chỉ đầy đủ
         const finalAddress = `${houseNumber} ${street}, ${ward}, ${district}, ${province}`;
