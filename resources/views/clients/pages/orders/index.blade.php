@@ -12,7 +12,7 @@
                 <h1 class="font-serif text-3xl font-bold text-[#1F2937]">Lịch sử đơn hàng</h1>
                 <p class="text-gray-500 text-sm mt-1">Xin chào {{ Auth::user()->name }}, đây là toàn bộ đơn hàng của bạn.</p>
             </div>
-            <a href="{{ route('orders.lookup.form') }}" class="text-sm font-medium text-[#354A3D] hover:underline flex items-center gap-1.5 shrink-0">
+            <a href="{{ route('my.orders.lookup.form') }}" class="text-sm font-medium text-[#354A3D] hover:underline flex items-center gap-1.5 shrink-0">
                 <i class="fa-solid fa-magnifying-glass"></i> Tra cứu đơn bằng mã đơn + SĐT
             </a>
         </div>
@@ -34,7 +34,7 @@
                 $tabs = ['all' => 'Tất cả'] + $statusLabels;
             @endphp
             @foreach($tabs as $key => $label)
-                <a href="{{ route('orders.index', $key === 'all' ? [] : ['status' => $key]) }}"
+                <a href="{{ route('my.orders.index', $key === 'all' ? [] : ['status' => $key]) }}"
                    class="px-4 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-colors border
                    {{ $status === $key ? 'bg-[#354A3D] text-white border-[#354A3D]' : 'bg-white text-gray-600 border-gray-200 hover:border-[#354A3D]/40' }}">
                     {{ $label }}
@@ -65,7 +65,7 @@
                             'cancelled'  => 'bg-red-50 text-red-700 border-red-200',
                         ];
                     @endphp
-                    <a href="{{ route('orders.show', $order->id) }}" class="block bg-white rounded-2xl border border-black/5 shadow-sm p-5 sm:p-6 hover:shadow-md transition-shadow">
+                    <a href="{{ route('my.orders.show', $order->id) }}" class="block bg-white rounded-2xl border border-black/5 shadow-sm p-5 sm:p-6 hover:shadow-md transition-shadow">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-xl bg-[#F8F6F2] flex items-center justify-center text-[#354A3D] shrink-0">

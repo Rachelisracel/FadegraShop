@@ -12,7 +12,7 @@ class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with('role');
+        $query = User::with('roleRelation');
 
         if ($request->has('search') && $request->search != '') {
             $search = $request->search;
@@ -23,7 +23,7 @@ class UserController extends Controller
         }
 
         if ($request->has('role') && $request->role != '') {
-            $query->whereHas('role', function($q) use ($request) {
+            $query->whereHas('roleRelation', function($q) use ($request) {
                 $q->where('name', $request->role);
             });
         }

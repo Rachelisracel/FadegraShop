@@ -37,7 +37,7 @@ class OrderController extends Controller
         // Admin/Staff không dùng trang lịch sử đơn hàng của khách — chuyển sang trang quản lý đơn
         $userRole = Auth::user()->roleRelation->name ?? '';
         if (in_array($userRole, ['admin', 'staff'])) {
-            return redirect()->route('admin.orders.index');
+            return redirect()->route('orders.index');
         }
 
         $status = $request->query('status', 'all');
@@ -71,7 +71,7 @@ class OrderController extends Controller
     public function lookupForm()
     {
         if (Auth::check()) {
-            return redirect()->route('orders.index');
+            return redirect()->route('my.orders.index');
         }
 
         return view('clients.pages.orders.lookup');
@@ -116,7 +116,7 @@ class OrderController extends Controller
         $verified[] = $order->id;
         session(['verified_order_ids' => array_values(array_unique($verified))]);
 
-        return redirect()->route('orders.show', $order->id);
+        return redirect()->route('my.orders.show', $order->id);
     }
 
     /**

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\OrderController;
 
 // ==========================================
 // 1. CÁC TRANG CƠ BẢN (CLIENT)
@@ -22,6 +23,19 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::get('/cart', function () { return view('clients.pages.cart'); })->name('cart');
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.post');
+
+// ==========================================
+// 2b. ĐƠN HÀNG (CLIENT) — dùng prefix 'my' để tránh trùng với resource admin 'orders'
+// ==========================================
+Route::middleware('auth')->group(function () {
+    Route::get('/orders', [OrderController::class, 'index'])->name('my.orders.index');
+    Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('my.orders.cancel');
+    Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('my.orders.reorder');
+    Route::post('/orders/{order}/review', [OrderController::class, 'review'])->name('my.orders.review');
+});
+Route::get('/orders/lookup', [OrderController::class, 'lookupForm'])->name('my.orders.lookup.form');
+Route::post('/orders/lookup', [OrderController::class, 'lookup'])->name('my.orders.lookup');
+Route::get('/orders/{order}', [OrderController::class, 'show'])->name('my.orders.show');
 
 // ==========================================
 // 3. XÁC THỰC (ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU)

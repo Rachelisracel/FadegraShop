@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User; 
+use App\Models\User;
+use App\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail; 
 use App\Mail\SendOtpMail; 
@@ -21,11 +22,12 @@ class AuthController extends Controller
 
         $loginField = $request->input('login_field');
         $password = $request->input('password');
+        $remember = (bool) $request->boolean('remember');
 
         // Check if login_field is email or phone
         $fieldType = filter_var($loginField, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
 
-        if (Auth::attempt([$fieldType => $loginField, 'password' => $password])) {
+        if (Auth::attempt([$fieldType => $loginField, 'password' => $password], $remember)) {
 
             // Bảo mật session
             $request->session()->regenerate();
@@ -33,8 +35,12 @@ class AuthController extends Controller
             // Lấy tên quyền (role) của người dùng vừa đăng nhập
             $userRole = Auth::user()->roleRelation->name ?? '';
 
-            // Tất cả đều chuyển về trang chủ, admin sẽ thấy nút Dashboard trên header
-            return redirect('/');
+            // Admin/Staff chuyển thẳng vào dashboard, khách về trang chủ
+            if (in_array($userRole, ['admin', 'staff'], true)) {
+                return redirect()->route('admin.dashboard');
+            }
+
+            return redirect()->intended('/');
         }
 
         return back()->withErrors([
@@ -57,12 +63,13 @@ class AuthController extends Controller
         ]);
 
         // 2. Tạo tài khoản mới vào Database
+        $customerRole = Role::where('name', 'customer')->first();
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password), // Mã hóa mật khẩu
             'phone' => $request->phone,
-            'role_id' => 3, // Mặc định ai đăng ký cũng là Khách hàng (customer)
+            'role_id' => $customerRole?->id, // Mặc định ai đăng ký cũng là Khách hàng (customer)
             'role' => 'customer',
             'status' => 'active',
         ]);

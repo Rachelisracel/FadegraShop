@@ -9,7 +9,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar', 'role_id', 'status'];
+    protected $fillable = ['name', 'email', 'password', 'phone', 'avatar', 'role_id', 'role', 'status'];
 
     public function roleRelation()
     {

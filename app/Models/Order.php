@@ -6,7 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
+    public const STATUS_LABELS = [
+        'pending' => 'Chờ xác nhận',
+        'processing' => 'Đang chuẩn bị',
+        'shipping' => 'Đang giao',
+        'completed' => 'Hoàn thành',
+        'cancelled' => 'Đã hủy',
+    ];
+
     protected $fillable = ['user_id', 'shipping_address_id', 'total_price', 'status'];
+    protected $casts = [
+        'total_price' => 'decimal:2',
+    ];
 
     public function user()
     {

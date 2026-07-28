@@ -20,7 +20,7 @@
             </div>
         @endif
 
-        <form action="{{ route('orders.lookup') }}" method="POST" class="space-y-4">
+        <form action="{{ route('my.orders.lookup') }}" method="POST" class="space-y-4">
             @csrf
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-1.5">Mã đơn hàng</label>

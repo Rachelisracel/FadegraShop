@@ -27,7 +27,7 @@
 
         <!-- Back + Header -->
         <div class="mb-6">
-            <a href="{{ $isOwner ? route('orders.index') : route('orders.lookup.form') }}" class="text-sm text-gray-500 hover:text-[#354A3D] flex items-center gap-1.5 mb-4">
+            <a href="{{ $isOwner ? route('my.orders.index') : route('my.orders.lookup.form') }}" class="text-sm text-gray-500 hover:text-[#354A3D] flex items-center gap-1.5 mb-4">
                 <i class="fa-solid fa-arrow-left text-xs"></i> Quay lại
             </a>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -144,7 +144,7 @@
                                                         class="text-xs font-semibold text-[#354A3D] hover:underline flex items-center gap-1">
                                                     <i class="fa-regular fa-star"></i> Đánh giá sản phẩm này
                                                 </button>
-                                                <form id="review-form-{{ $item->product_id }}" action="{{ route('orders.review', $order->id) }}" method="POST" class="hidden mt-3 bg-gray-50 rounded-xl p-4 space-y-3">
+                                                <form id="review-form-{{ $item->product_id }}" action="{{ route('my.orders.review', $order->id) }}" method="POST" class="hidden mt-3 bg-gray-50 rounded-xl p-4 space-y-3">
                                                     @csrf
                                                     <input type="hidden" name="product_id" value="{{ $item->product_id }}">
                                                     <div class="flex items-center gap-1">
@@ -226,7 +226,7 @@
                 <div class="bg-white rounded-2xl border border-black/5 shadow-sm p-6 sm:p-8 space-y-3">
                     <h2 class="font-serif text-lg font-bold text-[#1F2937] mb-2">Hành động</h2>
 
-                    <form action="{{ route('orders.reorder', $order->id) }}" method="POST">
+                    <form action="{{ route('my.orders.reorder', $order->id) }}" method="POST">
                         @csrf
                         <button type="submit" class="w-full bg-[#354A3D] text-white font-semibold rounded-xl py-3 hover:bg-[#2A4435] transition-colors flex items-center justify-center gap-2 text-sm">
                             <i class="fa-solid fa-rotate-right"></i> Đặt lại đơn hàng này
@@ -234,7 +234,7 @@
                     </form>
 
                     @if($cancellable)
-                        <form action="{{ route('orders.cancel', $order->id) }}" method="POST"
+                        <form action="{{ route('my.orders.cancel', $order->id) }}" method="POST"
                               onsubmit="return confirm('Bạn chắc chắn muốn hủy đơn hàng #{{ str_pad($order->id, 6, '0', STR_PAD_LEFT) }}?');">
                             @csrf
                             <button type="submit" class="w-full bg-white border border-red-200 text-red-600 font-semibold rounded-xl py-3 hover:bg-red-50 transition-colors flex items-center justify-center gap-2 text-sm">

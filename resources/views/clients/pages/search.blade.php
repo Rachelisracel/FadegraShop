@@ -224,7 +224,7 @@ $toppings = [
         imageArea.style.backgroundColor = bgColor;
         let innerHtml = `<button onclick="closeOrderModal()" class="absolute top-4 right-4 bg-white/70 hover:bg-white text-gray-800 rounded-full w-8 h-8 flex items-center justify-center z-20 backdrop-blur-sm transition"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>`;
         if (item.tag) innerHtml += `<span class="absolute top-4 left-4 bg-[#354A3D] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-sm">${item.tag === 'hot' ? 'HOT' : 'MỚI'}</span>`;
-        if (item.image) innerHtml += `<img src="{{ asset('images') }}/${item.image}" class="w-full h-full object-cover">`;
+        if (item.image) innerHtml += `<img src="{{ asset('images/') }}/${item.image}" class="w-full h-full object-cover">`;
         else innerHtml += `<span class="text-7xl opacity-30 drop-shadow-sm">${emoji}</span>`;
         imageArea.innerHTML = innerHtml;
         document.getElementById('modalTitle').innerText = item.name;

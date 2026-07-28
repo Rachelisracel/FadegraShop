@@ -12,7 +12,16 @@ class ContactController extends Controller
     public function index()
     {
         $contacts = Contact::with('user')->latest()->paginate(10);
-        return view('admin.pages.contacts.index', compact('contacts'));
+        return view('admin.pages.contacts', compact('contacts'));
+    }
+
+    public function show(Contact $contact)
+    {
+        $contact->load('user');
+        return view('admin.pages.contacts', [
+            'contacts' => Contact::with('user')->latest()->paginate(10),
+            'viewingContact' => $contact,
+        ]);
     }
 
     // Cập nhật trạng thái phản hồi (Chờ xử lý / Đang xử lý / Đã xong)

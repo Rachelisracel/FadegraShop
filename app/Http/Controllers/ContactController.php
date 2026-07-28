@@ -36,14 +36,14 @@ class ContactController extends Controller
 
         // Lưu thông tin phản hồi vào CSDL
         Contact::create([
-            'user_id'    => Auth::id(), // Tự lưu user_id nếu khách đã đăng nhập (nếu không sẽ là null)
-            'name'       => $request->name,
-            'email'      => $request->email,
-            'phone'      => $request->phone,
-            'order_code' => $request->order_code,
-            'subject'    => $request->subject,
-            'message'    => $request->message,
-            'status'     => 'pending',
+            'user_id'      => Auth::id(), // Tự lưu user_id nếu khách đã đăng nhập (nếu không sẽ là null)
+            'full_name'    => $request->name,
+            'email'        => $request->email,
+            'phone_number' => $request->phone,
+            'order_code'   => $request->order_code,
+            'subject'      => $request->subject,
+            'message'      => $request->message,
+            'status'       => 'pending',
         ]);
 
         return redirect()->back()->with('success', 'Gửi liên hệ thành công! Chúng tôi sẽ phản hồi sớm nhất.');

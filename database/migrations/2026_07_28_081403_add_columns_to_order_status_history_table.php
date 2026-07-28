@@ -6,21 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up()
+    public function up(): void
     {
         Schema::table('order_status_history', function (Blueprint $table) {
             $table->string('old_status')->nullable()->after('status');
             $table->string('new_status')->nullable()->after('old_status');
-            $table->unsignedBigInteger('changed_by')->nullable()->after('new_status');
+            $table->foreignId('changed_by')->nullable()->after('new_status')->constrained('users')->nullOnDelete();
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::table('order_status_history', function (Blueprint $table) {
+            $table->dropForeign(['changed_by']);
             $table->dropColumn(['old_status', 'new_status', 'changed_by']);
         });
     }

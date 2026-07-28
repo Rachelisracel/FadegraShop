@@ -3,7 +3,7 @@
 @section('content')
 <div class="min-h-screen bg-green-50 py-10 px-6">
     <div class="max-w-4xl mx-auto">
-        <a href="{{ route('orders.index') }}" class="inline-flex items-center text-green-700 hover:text-green-900 mb-6">
+        <a href="{{ route('my.orders.index') }}" class="inline-flex items-center text-green-700 hover:text-green-900 mb-6">
             ← Quay lại danh sách đơn hàng
         </a>
 
@@ -16,11 +16,14 @@
                 </div>
                 <span class="px-3 py-1 rounded-full text-sm font-medium mt-2 sm:mt-0
                     @if($order->status == 'completed') bg-green-200 text-green-800
-                    @elseif($order->status == 'delivering') bg-yellow-100 text-yellow-800
+                    @elseif($order->status == 'shipping') bg-yellow-100 text-yellow-800
+                    @elseif($order->status == 'cancelled') bg-red-100 text-red-800
                     @else bg-gray-200 text-gray-600 @endif">
                     @if($order->status == 'pending') Chờ xử lý
-                    @elseif($order->status == 'delivering') Đang giao
+                    @elseif($order->status == 'processing') Đang chuẩn bị
+                    @elseif($order->status == 'shipping') Đang giao
                     @elseif($order->status == 'completed') Hoàn thành
+                    @elseif($order->status == 'cancelled') Đã hủy
                     @endif
                 </span>
             </div>
@@ -46,7 +49,7 @@
                 </h3>
 
                 <div class="space-y-4">
-                    @forelse($order->items as $item)
+                    @forelse($order->orderItems as $item)
                     <div class="flex items-start space-x-4 p-4 bg-green-50/50 rounded-xl border border-green-100">
                         {{-- Ảnh --}}
                             <div class="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-white border border-green-200">
@@ -92,20 +95,4 @@
         </div>
     </div>
 </div>
-{{-- Thêm vào trước @endsection --}}
-@if(in_array($order->status, ['completed', 'cancelled']))
-<div class="px-6 py-4 bg-red-50 border-t border-red-200 flex justify-end">
-    <form action="{{ route('orders.destroy', $order->id) }}" method="POST"
-          onsubmit="return confirm('Bạn có chắc muốn xóa đơn hàng này? Hành động này không thể hoàn tác.')">
-        @csrf
-        @method('DELETE')
-        <button type="submit" class="text-red-600 hover:text-red-800 font-medium text-sm flex items-center gap-1">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-            Xóa đơn hàng
-        </button>
-    </form>
-</div>
-@endif
 @endsection

@@ -6,7 +6,7 @@
 <div class="min-h-screen bg-gray-50 py-10 px-6">
     <div class="max-w-6xl mx-auto">
         {{-- Nút quay lại --}}
-        <a href="{{ route('admin.orders.index') }}" class="inline-flex items-center text-green-700 hover:text-green-900 mb-6 transition-colors">
+        <a href="{{ route('orders.index') }}" class="inline-flex items-center text-green-700 hover:text-green-900 mb-6 transition-colors">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
             Quay lại danh sách đơn hàng
         </a>
@@ -14,7 +14,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {{-- Cột trái: Thông tin đơn hàng & sản phẩm --}}
             <div class="lg:col-span-2 space-y-6">
-                
+
                 {{-- Card trạng thái & cập nhật --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -24,13 +24,14 @@
                         </div>
                         <span class="px-3 py-1 rounded-full text-sm font-medium mt-2 sm:mt-0
                             @if($order->status == 'completed') bg-green-100 text-green-800
-                            @elseif($order->status == 'delivering') bg-blue-100 text-blue-800
+                            @elseif($order->status == 'shipping') bg-blue-100 text-blue-800
                             @elseif($order->status == 'cancelled') bg-red-100 text-red-800
                             @else bg-yellow-100 text-yellow-800
                             @endif">
                             @switch($order->status)
                                 @case('pending') ⏳ Chờ xử lý @break
-                                @case('delivering') 🚚 Đang giao @break
+                                @case('processing') 🛠 Đang chuẩn bị @break
+                                @case('shipping') 🚚 Đang giao @break
                                 @case('completed') ✅ Hoàn thành @break
                                 @case('cancelled') ❌ Đã hủy @break
                             @endswitch
@@ -41,18 +42,19 @@
                     @if(!in_array($order->status, ['completed', 'cancelled']))
                     <div class="border-t border-gray-100 pt-4">
                         <h3 class="font-semibold text-gray-800 mb-3">🔄 Cập nhật trạng thái</h3>
-                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="space-y-3">
+                        <form action="{{ route('orders.update', $order->id) }}" method="POST" class="space-y-3">
                             @csrf
                             @method('PUT')
                             <select name="status" class="w-full sm:w-auto rounded-lg border-gray-300 text-gray-900 px-3 py-2 focus:border-green-500 focus:ring-green-500">
                                 <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>⏳ Chờ xử lý</option>
-                                <option value="delivering" {{ $order->status == 'delivering' ? 'selected' : '' }}>🚚 Đang giao</option>
+                                <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>🛠 Đang chuẩn bị</option>
+                                <option value="shipping" {{ $order->status == 'shipping' ? 'selected' : '' }}>🚚 Đang giao hàng</option>
                                 <option value="completed">✅ Hoàn thành</option>
                                 <option value="cancelled">❌ Hủy đơn</option>
                             </select>
-                            <input type="text" name="note" placeholder="Ghi chú (tùy chọn)" 
+                            <input type="text" name="note" placeholder="Ghi chú (tùy chọn)"
                                    class="w-full rounded-lg border-gray-300 text-sm px-3 py-2 focus:border-green-500 focus:ring-green-500">
-                            <button type="submit" 
+                            <button type="submit"
                                     class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-sm font-medium transition-colors">
                                 Cập nhật
                             </button>
@@ -63,9 +65,9 @@
 
                 {{-- Danh sách sản phẩm --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4 text-lg">🛒 Sản phẩm đã đặt ({{ $order->items->count() }})</h3>
+                    <h3 class="font-semibold text-gray-800 mb-4 text-lg">🛒 Sản phẩm đã đặt ({{ $order->orderItems->count() }})</h3>
                     <div class="space-y-4">
-                        @forelse($order->items as $item)
+                        @forelse($order->orderItems as $item)
                         <div class="flex items-start gap-4 p-4 bg-gray-50 rounded-xl">
                             @php $firstImage = $item->product->images->first(); @endphp
                             <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-lg overflow-hidden bg-white border flex-shrink-0">
@@ -107,13 +109,13 @@
                             <div class="w-2.5 h-2.5 mt-1.5 rounded-full bg-green-500 flex-shrink-0"></div>
                             <div>
                                 <p class="text-gray-700">
-                                    <strong>{{ $history->changedBy->name ?? 'Hệ thống' }}</strong>
-                                    đã chuyển từ <em>"{{ $history->old_status }}"</em> sang <em>"{{ $history->new_status }}"</em>
+                                    <strong>{{ optional($history->changedBy)->name ?? ($history->changed_by ? 'Quản trị viên' : 'Hệ thống') }}</strong>
+                                    đã chuyển sang <em>"{{ \App\Models\Order::STATUS_LABELS[$history->status] ?? $history->status }}"</em>
                                 </p>
                                 @if($history->note)
                                     <p class="text-gray-500 text-xs mt-1">📝 {{ $history->note }}</p>
                                 @endif
-                                <p class="text-gray-400 text-xs">{{ $history->created_at->format('d/m/Y H:i') }}</p>
+                                <p class="text-gray-400 text-xs">{{ $history->changed_at?->format('d/m/Y H:i') }}</p>
                             </div>
                         </div>
                         @endforeach

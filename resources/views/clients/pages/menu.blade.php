@@ -373,7 +373,7 @@
                 innerHtml += `<span class="absolute top-4 left-4 bg-[#354A3D] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider z-10 shadow-sm">${item.tag === 'hot' ? 'HOT' : 'MỚI'}</span>`;
             }
             if (item.image) {
-                innerHtml += `<img src="{{ asset('images') }}/${item.image}" class="w-full h-full object-cover">`;
+                innerHtml += `<img src="{{ asset('images/') }}/${item.image}" class="w-full h-full object-cover">`;
             } else {
                 innerHtml += `<span class="text-7xl opacity-30 drop-shadow-sm">${emoji}</span>`;
             }

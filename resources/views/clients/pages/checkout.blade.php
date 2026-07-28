@@ -152,7 +152,7 @@
             currentSubtotal += item.totalPrice;
             
             const imageTag = item.image 
-                ? `<img src="{{ asset('images') }}/${item.image}" class="w-full h-full object-cover">`
+                ? `<img src="{{ asset('images/') }}/${item.image}" class="w-full h-full object-cover">`
                 : `<span class="text-2xl">🧋</span>`;
                 
             const toppingText = (item.toppings && item.toppings.length > 0) ? `<br><span class="text-xs text-gray-400">+ ${item.toppings.join(', ')}</span>` : '';

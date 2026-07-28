@@ -8,10 +8,18 @@ class OrderStatusHistory extends Model
 {
     protected $table = 'order_status_history';
     public $timestamps = false;
-    protected $fillable = ['order_id', 'status', 'note', 'changed_at'];
+    protected $fillable = ['order_id', 'status', 'note', 'changed_at', 'old_status', 'new_status', 'changed_by'];
+    protected $casts = [
+        'changed_at' => 'datetime',
+    ];
 
     public function order()
     {
         return $this->belongsTo(Order::class);
+    }
+
+    public function changedBy()
+    {
+        return $this->belongsTo(User::class, 'changed_by');
     }
 }
