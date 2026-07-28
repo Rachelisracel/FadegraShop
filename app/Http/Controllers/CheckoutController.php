@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cart;
+use App\Models\Product;
+use App\Models\Size;
+use App\Models\Topping;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -21,35 +25,26 @@ class CheckoutController extends Controller
     public function process(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string',
-            'address' => 'required|string',
-            'payment_method' => 'required|string',
+            'name' => 'required',
+            'phone' => 'required',
+            'address' => 'required',
+            'payment_method' => 'required',
             'cart_data' => 'required'
         ]);
 
-        // Giải mã JSON giỏ hàng từ Javascript gửi lên
         $cart = json_decode($request->cart_data, true);
-        
-        if(empty($cart)) {
-            return back()->withErrors(['error' => 'Giỏ hàng đang trống!']);
+        if (empty($cart)) {
+            return back()->withErrors(['error' => 'Giỏ hàng đang trống!'])->withInput();
         }
+
+        // Lấy phí ship từ frontend (đơn vị VND)
+        $shippingFee = (int) $request->shipping_fee;
 
         DB::beginTransaction();
         try {
-            // Tính lại tiền
-            $subtotal = 0;
-            foreach($cart as $item) {
-                // JS đang lưu totalPrice là số ngàn (VD: 50 nghĩa là 50.000)
-                $subtotal += $item['totalPrice'] * 1000; 
-            }
-            
-            $shippingFee = (int)$request->shipping_fee;
-            $total = $subtotal + $shippingFee;
-
-            // Bước 1: Tạo Shipping Address trước
+            // 1. Tạo địa chỉ
             $shippingAddress = ShippingAddress::create([
-                'user_id' => Auth::check() ? Auth::id() : null,
+                'user_id' => Auth::id(),
                 'full_name' => $request->name,
                 'phone' => $request->phone,
                 'address' => $request->address,
@@ -57,24 +52,83 @@ class CheckoutController extends Controller
                 'detail' => $request->note ?? null,
             ]);
 
-            // Bước 2: Tạo Đơn hàng với shipping_address_id hợp lệ
+            // 2. Tạo đơn hàng (tạm tổng = 0)
             $order = Order::create([
-                'user_id' => Auth::check() ? Auth::id() : null,
+                'user_id' => Auth::id(),
                 'shipping_address_id' => $shippingAddress->id,
-                'total_price' => $total,
+                'total_price' => 0,
                 'status' => 'pending',
             ]);
 
+            $total = 0;
+
+            // 3. Lưu từng món
+            foreach ($cart as $item) {
+                // Tìm sản phẩm (theo ID hoặc tên)
+                $product = null;
+                if (!empty($item['product_id'])) {
+                    $product = Product::find($item['product_id']);
+                }
+                if (!$product && !empty($item['name'])) {
+                    $product = Product::where('name', $item['name'])->first();
+                }
+                if (!$product) continue;
+
+                // Tìm size theo tên (nếu có)
+                $size = null;
+                $sizeName = $item['size'] ?? null;
+                if ($sizeName && $sizeName !== 'Mặc định') {
+                    $size = Size::where('name', $sizeName)->first();
+                }
+
+                // Tính giá sản phẩm + size
+                $price = $product->price;
+                if ($size) {
+                    $price += $size->price_extra ?? 0;
+                }
+                $sizeId = $size ? $size->id : null;
+
+                $quantity = $item['quantity'];
+
+                // Tạo OrderItem
+                $orderItem = OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $product->id,
+                    'size_id' => $sizeId,
+                    'quantity' => $quantity,
+                    'price' => $price,
+                ]);
+
+                $itemTotal = $price * $quantity;
+
+                // Lưu topping theo tên
+                $toppingNames = $item['toppings'] ?? [];
+                foreach ($toppingNames as $toppingName) {
+                    $topping = Topping::where('name', $toppingName)->first();
+                    if ($topping) {
+                        $orderItem->toppings()->attach($topping->id, ['price' => $topping->price]);
+                        $itemTotal += $topping->price * $quantity;
+                    }
+                }
+
+                $total += $itemTotal;
+            }
+
+            // 4. Cộng phí ship vào tổng
+            $total += $shippingFee;
+
+            // 5. Cập nhật tổng tiền đơn hàng
+            $order->update(['total_price' => $total]);
+
             DB::commit();
 
-            // Xóa JS Cart bằng cách chèn 1 script nhỏ vào session thông báo
+            // Xóa giỏ hàng localStorage (thông báo cho frontend)
             session()->flash('clear_cart', true);
 
-            return redirect()->route('home')->with('success', 'Đặt hàng thành công! Chúng tôi sẽ sớm liên hệ cho bạn.');
-
+            return redirect()->route('home')->with('success', 'Đặt hàng thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => 'Có lỗi xảy ra: ' . $e->getMessage()]);
+            return back()->withErrors(['error' => 'Lỗi: ' . $e->getMessage()])->withInput();
         }
     }
-}
+}
