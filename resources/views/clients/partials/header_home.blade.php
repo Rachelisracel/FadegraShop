@@ -17,20 +17,30 @@
             <!-- Icons -->
             <div class="flex items-center space-x-6 text-white text-lg">
                 @if(Auth::check())
-                    <a href="#" class="hover:text-cream-accent transition-colors text-sm font-medium" title="Tài khoản">
-                        Xin chào, {{ Auth::user()->name }}
-                    </a>
-                    @if(in_array(Auth::user()->roleRelation->name ?? '', ['admin', 'staff']))
-                        <a href="{{ url('/admin/dashboard') }}" class="bg-cream-accent/20 hover:bg-cream-accent/40 text-cream-accent border border-cream-accent/30 px-3 py-1 rounded-full text-xs font-bold transition-colors" title="Quản trị">
-                            <i class="fa-solid fa-gauge-high mr-1"></i> Dashboard
-                        </a>
-                    @endif
-                    <form action="{{ route('logout') }}" method="POST" class="inline">
-                        @csrf
-                        <button type="submit" class="hover:text-cream-accent transition-colors text-sm" title="Đăng xuất">
-                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <div class="relative group">
+                        <button class="hover:text-cream-accent transition-colors text-sm font-medium flex items-center gap-2 py-1 focus:outline-none">
+                            <i class="fa-regular fa-user"></i>
+                            <span>Xin chào, {{ Auth::user()->name }}</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] opacity-70 transition-transform group-hover:rotate-180"></i>
                         </button>
-                    </form>
+                        <!-- Dropdown Menu -->
+                        <div class="absolute right-0 top-full mt-2 w-52 bg-white text-gray-800 rounded-2xl shadow-xl border border-black/5 py-2 hidden group-hover:block group-focus-within:block z-50">
+                            <a href="{{ route('client.orders.index') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold hover:bg-cream hover:text-forest transition">
+                                <i class="fa-solid fa-receipt text-forest text-sm w-4"></i> Đơn hàng của tôi
+                            </a>
+                            @if(in_array(Auth::user()->roleRelation->name ?? '', ['admin', 'staff']))
+                                <a href="{{ url('/admin/dashboard') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm font-semibold hover:bg-cream hover:text-forest transition border-t border-gray-100">
+                                    <i class="fa-solid fa-gauge-high text-forest text-sm w-4"></i> Trang quản trị (Dashboard)
+                                </a>
+                            @endif
+                            <form action="{{ route('logout') }}" method="POST" class="border-t border-gray-100">
+                                @csrf
+                                <button type="submit" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold text-red-600 hover:bg-red-50 transition text-left">
+                                    <i class="fa-solid fa-arrow-right-from-bracket text-sm w-4"></i> Đăng xuất
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 @else
                     <a href="{{ url('/login') }}" class="hover:text-cream-accent transition-colors" title="Tài khoản">
                         <i class="fa-regular fa-user"></i>

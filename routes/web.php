@@ -23,9 +23,17 @@ Route::get('/cart', function () { return view('clients.pages.cart'); })->name('c
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.post');
 
+use App\Http\Controllers\ClientOrderController;
+
 // ==========================================
-// 3. XÁC THỰC (ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU)
+// 3.5. ĐƠN HÀNG CỦA KHÁCH HÀNG (YÊU CẦU ĐĂNG NHẬP)
 // ==========================================
+Route::middleware(['auth'])->group(function () {
+    Route::get('/my-orders', [ClientOrderController::class, 'index'])->name('client.orders.index');
+    Route::get('/my-orders/{id}', [ClientOrderController::class, 'show'])->name('client.orders.show');
+    Route::post('/my-orders/{id}/cancel', [ClientOrderController::class, 'cancel'])->name('client.orders.cancel');
+});
+
 Route::get('/login', function () { return view('clients.pages.login'); })->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
