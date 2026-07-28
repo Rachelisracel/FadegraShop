@@ -19,10 +19,11 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 // ==========================================
 // 2. GIỎ HÀNG & THANH TOÁN
 // ==========================================
-Route::get('/cart', function () { return view('clients.pages.cart'); })->name('cart');
-Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
-Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.post');
-
+Route::middleware('auth')->group(function () {
+    Route::get('/cart', function () { return view('clients.pages.cart'); })->name('cart');
+    Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.post');
+});
 // ==========================================
 // 3. XÁC THỰC (ĐĂNG NHẬP, ĐĂNG KÝ, QUÊN MẬT KHẨU)
 // ==========================================
@@ -47,7 +48,10 @@ Route::post('/reset-password', [AuthController::class, 'processResetPassword'])-
 // ==========================================
 // 4. TRANG QUẢN TRỊ ADMIN / STAFF
 // ==========================================
-Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function () {
+Route::prefix('admin')
+->name('admin.')
+->middleware(['auth', 'role:admin,staff'])
+->group(function () {
     Route::get('/dashboard', function () {
         $today = \Carbon\Carbon::today();
         $thisMonth = \Carbon\Carbon::now()->month;
@@ -60,7 +64,7 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function
         $monthlyOrders = \App\Models\Order::whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->count();
 
         return view('admin.pages.dashboard', compact('dailyRevenue', 'monthlyRevenue', 'dailyOrders', 'monthlyOrders')); 
-    });
+    })->name('dashboard');;
 
     Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
 
@@ -68,4 +72,16 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->except(['create', 'show', 'edit']);
         Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['create', 'show', 'edit']);
     });
+    Route::get('/orders-test', function () {
+    return view('admin.pages.orders', ['orders' => App\Models\Order::paginate(20)]);
+    })->name('admin.orders.test');
+
 });
+
+// 5. ĐƠN HÀNG CỦA KHÁCH (CLIENT)
+    Route::middleware('auth')->group(function () {
+    Route::get('/orders', [\App\Http\Controllers\OrderController::class, 'index'])->name('orders.index');
+    Route::get('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'show'])->name('orders.show');
+    Route::delete('/orders/{order}', [\App\Http\Controllers\OrderController::class, 'destroy'])->name('orders.destroy');
+});
+
