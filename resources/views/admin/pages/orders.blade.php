@@ -8,8 +8,8 @@
     <!-- HEADER -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800">📋 Quản lý Đơn hàng</h1>
-            <p class="text-sm text-gray-500 mt-1">Theo dõi và cập nhật trạng thái đơn đặt hàng. Tổng: {{ $orders->total() }} đơn</p>
+            <h1 class="text-2xl font-bold text-gray-800">Quản lý Đơn hàng</h1>
+            <p class="text-sm text-gray-500 mt-1">Theo dõi và cập nhật trạng thái đơn đặt hàng.</p>
         </div>
     </div>
 
@@ -21,145 +21,99 @@
     </div>
     @endif
 
-    @if($errors->any())
-    <div class="mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
-        {{ $errors->first() }}
-    </div>
-    @endif
-
-    <!-- FILTER TABS -->
-    <div class="flex gap-2 mb-6 flex-wrap">
-        <a href="{{ route('admin.orders.index') }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ !request('status') ? 'bg-green-600 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50' }}">
-            Tất cả
-        </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'pending']) }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ request('status') == 'pending' ? 'bg-yellow-500 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50' }}">
-            ⏳ Chờ xử lý
-        </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'delivering']) }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ request('status') == 'delivering' ? 'bg-blue-500 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50' }}">
-            🚚 Đang giao
-        </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'completed']) }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ request('status') == 'completed' ? 'bg-green-500 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50' }}">
-            ✅ Hoàn thành
-        </a>
-        <a href="{{ route('admin.orders.index', ['status' => 'cancelled']) }}" 
-           class="px-4 py-2 rounded-full text-sm font-medium {{ request('status') == 'cancelled' ? 'bg-red-500 text-white' : 'bg-white text-gray-600 border hover:bg-gray-50' }}">
-            ❌ Đã hủy
-        </a>
-    </div>
-
-    <!-- DANH SÁCH ĐƠN HÀNG -->
-    <div class="space-y-4">
-        @forelse($orders as $order)
-        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow">
-            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                <div class="flex-1">
-                    <div class="flex items-center gap-3 mb-2">
-                        <h2 class="font-semibold text-gray-900 text-lg">
-                            #{{ $order->id }}
-                        </h2>
-                        <span class="px-2.5 py-1 text-xs font-medium rounded-full 
-                            @if($order->status == 'completed') bg-green-100 text-green-800
-                            @elseif($order->status == 'delivering') bg-blue-100 text-blue-800
-                            @elseif($order->status == 'cancelled') bg-red-100 text-red-800
-                            @else bg-yellow-100 text-yellow-800
-                            @endif">
-                            @switch($order->status)
-                                @case('pending') Chờ xử lý @break
-                                @case('delivering') Đang giao @break
-                                @case('completed') Hoàn thành @break
-                                @case('cancelled') Đã hủy @break
-                            @endswitch
-                        </span>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm">
-                        <div>
-                            <span class="text-gray-500">Khách hàng:</span>
-                            <span class="font-medium">{{ $order->user->name ?? $order->shippingAddress->full_name ?? 'N/A' }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Địa chỉ:</span>
-                            <span class="font-medium truncate block max-w-[250px]">{{ $order->shippingAddress->address ?? 'N/A' }}</span>
-                        </div>
-                        <div>
-                            <span class="text-gray-500">Ngày đặt:</span>
-                            <span class="font-medium">{{ $order->created_at->format('d/m/Y H:i') }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-4">
-                    <div class="text-right">
-                        <p class="text-2xl font-bold text-green-800">
-                            {{ number_format($order->total_price, 0, ',', '.') }}₫
-                        </p>
-                        <p class="text-xs text-gray-500">{{ $order->items->count() }} sản phẩm</p>
-                    </div>
-                    
-                    <div class="flex gap-2">
-                        {{-- Nút xem chi tiết --}}
-                        <a href="{{ route('admin.orders.show', $order->id) }}" 
-                           class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
-                           title="Xem chi tiết">
-                            👁️
-                        </a>
-                        
-                        {{-- Nút mở modal cập nhật trạng thái --}}
-                        <button onclick='openOrderModal(@json($order))' 
-                                class="px-3 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors"
-                                title="Cập nhật trạng thái">
-                            ✏️
-                        </button>
-
-                        {{-- Nút nhanh chuyển trạng thái --}}
-                        @if($order->status == 'pending')
-                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="status" value="delivering">
-                            <button type="submit" 
-                                    class="px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors"
-                                    title="Bắt đầu giao hàng">
-                                🚚
-                            </button>
-                        </form>
-                        @endif
-
-                        @if($order->status == 'delivering')
-                        <form action="{{ route('admin.orders.update', $order->id) }}" method="POST" class="inline">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="status" value="completed">
-                            <button type="submit" 
-                                    class="px-3 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
-                                    onclick="return confirm('Xác nhận đơn hàng đã giao thành công?')"
-                                    title="Hoàn thành đơn hàng">
-                                ✅
-                            </button>
-                        </form>
-                        @endif
-                    </div>
-                </div>
-            </div>
+    <!-- TÌM KIẾM & LỌC -->
+    <form action="{{ route('orders.index') }}" method="GET" class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-6 flex flex-col sm:flex-row gap-4 justify-between items-center">
+        <div class="relative w-full sm:w-96">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Tìm mã đơn hoặc tên khách..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:border-[#354A3D] focus:ring-1 focus:ring-[#354A3D] transition">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" /></svg>
         </div>
-        @empty
-        <div class="text-center py-16 text-gray-500 bg-white rounded-xl">
-            <p class="text-5xl mb-4">📭</p>
-            <p>Không có đơn hàng nào.</p>
+        <div class="flex gap-3 w-full sm:w-auto">
+            <select name="status" class="bg-gray-50 border border-gray-200 text-gray-700 text-sm rounded-lg px-4 py-2.5 focus:outline-none focus:border-[#354A3D] w-full sm:w-auto">
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Chờ xác nhận</option>
+                <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Đang chuẩn bị</option>
+                <option value="shipping" {{ request('status') == 'shipping' ? 'selected' : '' }}>Đang giao hàng</option>
+                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Hoàn thành</option>
+                <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Đã hủy</option>
+            </select>
+            <button type="submit" class="bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition">Lọc</button>
         </div>
-        @endforelse
-    </div>
+    </form>
 
-    {{-- Phân trang --}}
-    @if($orders->hasPages())
-    <div class="mt-6">
-        {{ $orders->links() }}
+    <!-- DATA TABLE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b border-gray-100 text-xs text-gray-500 uppercase tracking-wider">
+                        <th class="px-6 py-4 font-semibold">Mã Đơn</th>
+                        <th class="px-6 py-4 font-semibold">Khách Hàng</th>
+                        <th class="px-6 py-4 font-semibold">Tổng Tiền</th>
+                        <th class="px-6 py-4 font-semibold">Trạng Thái</th>
+                        <th class="px-6 py-4 font-semibold">Ngày Đặt</th>
+                        <th class="px-6 py-4 font-semibold text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    @forelse($orders as $order)
+                    <tr class="hover:bg-gray-50/50 transition">
+                        <td class="px-6 py-4 text-sm font-bold text-gray-800">#{{ $order->id }}</td>
+                        <td class="px-6 py-4">
+                            <p class="text-sm font-bold text-gray-800">{{ $order->user->name ?? 'Khách vãng lai' }}</p>
+                            <p class="text-xs text-gray-500">{{ $order->user->phone ?? 'Không có SĐT' }}</p>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-bold text-[#354A3D]">
+                            {{ number_format($order->total_price, 0, ',', '.') }}đ
+                        </td>
+                        <td class="px-6 py-4">
+                            @php
+                                $statusBadge = [
+                                    'pending' => 'bg-yellow-100 text-yellow-700',
+                                    'processing' => 'bg-blue-100 text-blue-700',
+                                    'shipping' => 'bg-purple-100 text-purple-700',
+                                    'completed' => 'bg-green-100 text-green-700',
+                                    'cancelled' => 'bg-red-100 text-red-700'
+                                ];
+                                $statusLabel = [
+                                    'pending' => 'Chờ xác nhận',
+                                    'processing' => 'Đang chuẩn bị',
+                                    'shipping' => 'Đang giao',
+                                    'completed' => 'Hoàn thành',
+                                    'cancelled' => 'Đã hủy'
+                                ];
+                                $badgeClass = $statusBadge[$order->status] ?? 'bg-gray-100 text-gray-600';
+                                $label = $statusLabel[$order->status] ?? 'Không xác định';
+                            @endphp
+                            <span class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full {{ $badgeClass }}">
+                                {{ $label }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-500">
+                            {{ $order->created_at ? $order->created_at->format('d/m/Y H:i') : 'N/A' }}
+                        </td>
+                        <td class="px-6 py-4 text-right space-x-2">
+                            <!-- Nút Xem/Sửa Trạng thái -->
+                            <button onclick='openOrderModal(@json($order))' class="text-blue-500 hover:text-blue-700 hover:bg-blue-50 px-3 py-1.5 rounded-lg text-sm font-medium transition" title="Xem">
+                                Chi tiết
+                            </button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">Không tìm thấy đơn hàng nào.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Phân trang -->
+        @if($orders->hasPages())
+        <div class="px-6 py-4 border-t border-gray-100">
+            {{ $orders->links() }}
+        </div>
+        @endif
     </div>
-    @endif
 </div>
 
 <!-- MODAL CẬP NHẬT TRẠNG THÁI -->
@@ -180,33 +134,20 @@
             
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Trạng thái mới</label>
-                    <select id="oStatus" name="status" required 
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition">
-                        <option value="pending">⏳ Chờ xử lý</option>
-                        <option value="delivering">🚚 Đang giao hàng</option>
-                        <option value="completed">✅ Hoàn thành</option>
-                        <option value="cancelled">❌ Hủy đơn</option>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Trạng thái hiện tại</label>
+                    <select id="oStatus" name="status" required class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#354A3D] focus:bg-white transition">
+                        <option value="pending">Chờ xác nhận</option>
+                        <option value="processing">Đang chuẩn bị</option>
+                        <option value="shipping">Đang giao hàng</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="cancelled">Đã hủy</option>
                     </select>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Ghi chú (tùy chọn)</label>
-                    <textarea name="note" rows="3" 
-                              class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 transition"
-                              placeholder="Nhập ghi chú cho lần cập nhật này..."></textarea>
                 </div>
             </div>
 
             <div class="mt-8 flex justify-end gap-3">
-                <button type="button" onclick="closeOrderModal()" 
-                        class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition">
-                    Đóng
-                </button>
-                <button type="submit" 
-                        class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-green-600 hover:bg-green-700 shadow-sm transition">
-                    Cập nhật trạng thái
-                </button>
+                <button type="button" onclick="closeOrderModal()" class="px-5 py-2.5 rounded-lg text-sm font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition">Đóng</button>
+                <button type="submit" class="px-6 py-2.5 rounded-lg text-sm font-medium text-white bg-[#354A3D] hover:bg-[#2A4435] shadow-sm transition">Cập nhật trạng thái</button>
             </div>
         </form>
     </div>
@@ -226,7 +167,7 @@
         
         document.getElementById('modalOrderId').innerText = '#' + order.id;
         document.getElementById('oStatus').value = order.status;
-        form.action = `/admin/orders/${order.id}`;
+        form.action = `/admin/orders/${order.id}`; 
         
         modal.classList.remove('hidden');
         modal.classList.add('flex');

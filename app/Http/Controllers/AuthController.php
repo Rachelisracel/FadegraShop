@@ -27,15 +27,13 @@ class AuthController extends Controller
 
         if (Auth::attempt([$fieldType => $loginField, 'password' => $password])) {
 
+            // Bảo mật session
             $request->session()->regenerate();
 
-            $userRole = Auth::user()->role; // lấy trực tiếp cột 'role'
+            // Lấy tên quyền (role) của người dùng vừa đăng nhập
+            $userRole = Auth::user()->roleRelation->name ?? '';
 
-            // Điều hướng dựa trên vai trò
-            if (in_array($userRole, ['admin', 'staff'])) {
-                return redirect()->route('admin.dashboard');
-            }
-
+            // Tất cả đều chuyển về trang chủ, admin sẽ thấy nút Dashboard trên header
             return redirect('/');
         }
 

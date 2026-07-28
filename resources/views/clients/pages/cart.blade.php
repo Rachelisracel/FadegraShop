@@ -395,7 +395,6 @@
     function submitOrder() {
         const updatedItem = {
             id: editingIndex !== null ? cart[editingIndex].id : Date.now().toString(),
-            product_id: editingIndex !== null ? cart[editingIndex].product_id : currentItemData.id,
             name: currentItemData.name,
             size: selectedSizeName || 'Mặc định',
             toppings: [...selectedToppingsList],

@@ -481,7 +481,6 @@
         function submitOrder() {
             const cartItem = {
                 id: Date.now().toString(),
-                product_id: currentItem.id, 
                 name: currentItem.name,
                 size: selectedSizeName,
                 toppings: [...selectedToppingsList],
