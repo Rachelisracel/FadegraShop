@@ -71,11 +71,58 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function
 
         $dailyRevenue = \App\Models\Order::whereDate('created_at', $today)->sum('total_price');
         $monthlyRevenue = \App\Models\Order::whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->sum('total_price');
-        
+
         $dailyOrders = \App\Models\Order::whereDate('created_at', $today)->count();
         $monthlyOrders = \App\Models\Order::whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->count();
 
-        return view('admin.pages.dashboard', compact('dailyRevenue', 'monthlyRevenue', 'dailyOrders', 'monthlyOrders')); 
+        // Biểu đồ doanh thu 7 ngày gần nhất (mỗi ngày tính tổng total_price)
+        $chartLabels = [];
+        $chartRevenue = [];
+        $chartValues = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = \Carbon\Carbon::today()->subDays($i);
+            $dayRevenue = \App\Models\Order::whereDate('created_at', $date)->sum('total_price');
+            $chartLabels[] = $date->format('d/m');
+            $chartRevenue[] = (float) $dayRevenue;
+            $chartValues[] = (float) $dayRevenue;
+        }
+        $chartData = [
+            'labels' => $chartLabels,
+            'values' => $chartValues,
+            'revenue' => $chartRevenue,
+        ];
+
+        // Top 5 sản phẩm bán chạy trong tháng
+        $topProducts = \App\Models\Product::query()
+            ->select('products.*')
+            ->selectRaw('COALESCE(SUM(order_items.quantity), 0) as total_sold')
+            ->leftJoin('order_items', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('orders', function ($join) use ($thisMonth, $thisYear) {
+                $join->on('orders.id', '=', 'order_items.order_id')
+                    ->whereMonth('orders.created_at', $thisMonth)
+                    ->whereYear('orders.created_at', $thisYear);
+            })
+            ->groupBy('products.id')
+            ->orderByDesc('total_sold')
+            ->limit(5)
+            ->get()
+            ->map(function ($p) {
+                // Lấy ảnh đầu tiên của sản phẩm (nếu có)
+                $firstImage = \App\Models\ProductImage::where('product_id', $p->id)->first();
+                $p->image = $firstImage ? $firstImage->image : null;
+                return $p;
+            });
+
+        // 5 đơn hàng mới nhất kèm user + orderItems + product
+        $recentOrders = \App\Models\Order::with(['user', 'orderItems.product'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        return view('admin.pages.dashboard', compact(
+            'dailyRevenue', 'monthlyRevenue', 'dailyOrders', 'monthlyOrders',
+            'chartData', 'topProducts', 'recentOrders'
+        ));
     })->name('admin.dashboard');
 
     // Quản lý Đơn hàng (Staff + Admin)
