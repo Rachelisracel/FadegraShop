@@ -5,6 +5,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ProfileController;
 
 // ==========================================
 // 1. CÁC TRANG CƠ BẢN (CLIENT)
@@ -32,6 +33,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/orders/{order}/cancel', [OrderController::class, 'cancel'])->name('my.orders.cancel');
     Route::post('/orders/{order}/reorder', [OrderController::class, 'reorder'])->name('my.orders.reorder');
     Route::post('/orders/{order}/review', [OrderController::class, 'review'])->name('my.orders.review');
+    Route::get('/orders/history', [OrderController::class, 'history'])->name('my.orders.history');
 });
 Route::get('/orders/lookup', [OrderController::class, 'lookupForm'])->name('my.orders.lookup.form');
 Route::post('/orders/lookup', [OrderController::class, 'lookup'])->name('my.orders.lookup');
@@ -137,3 +139,19 @@ Route::prefix('admin')->middleware(['auth', 'role:admin,staff'])->group(function
         Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['create', 'show', 'edit']);
     });
 });
+
+
+
+// Đặt trong nhóm yêu cầu đăng nhập
+Route::middleware(['auth'])->group(function () {
+    // Route hiển thị trang thông tin cá nhân
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    
+    // Route xử lý việc lưu (cập nhật) thông tin
+    Route::put('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+});
+
+
+Route::get('/help', function () {
+    return view('profile.help'); // Hãy sửa 'help' thành đường dẫn chính xác tới file blade của bạn (ví dụ: 'profile.help')
+})->middleware('auth')->name('help');

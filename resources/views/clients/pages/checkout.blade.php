@@ -3,7 +3,7 @@
 @section('title', 'Thanh toán đơn hàng — FADEGRA')
 
 @section('content')
-<div class="bg-[#F8F6F2] min-h-screen font-sans py-8 md:py-12">
+<div class="bg-cream min-h-screen font-sans py-8 md:py-12">
     <div class="max-w-7xl mx-auto px-4 sm:px-6">
         
         <div class="mb-8">

@@ -42,7 +42,7 @@ $toppings = [
 ];
 @endphp
 
-<div class="bg-[#F8F6F2] min-h-screen pb-24 font-sans relative">
+<div class="bg-cream min-h-screen pb-24 font-sans relative">
     
     <!-- HEADER & THANH TÌM KIẾM TRÊN TRANG -->
     <header class="bg-[#354A3D] pt-6 pb-8 px-6 sticky top-0 z-50 shadow-sm rounded-b-3xl">

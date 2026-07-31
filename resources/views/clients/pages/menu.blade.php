@@ -117,7 +117,7 @@
     }
     @endphp
 
-    <div class="bg-[#F8F6F2] min-h-screen pb-24 font-sans relative">
+    <div class="bg-cream min-h-screen pb-24 font-sans relative">
 
         <!-- 1. HEADER & FILTER CHIPS -->
         <header class="bg-[#354A3D] pt-4 pb-3 px-6 sticky top-0 z-50 shadow-sm">
@@ -154,7 +154,7 @@
                 </div>
 
                 <div class="flex overflow-x-auto gap-2.5 pb-1 scrollbar-none" style="scrollbar-width: none; -ms-overflow-style: none;">
-                    <a href="#tat-ca" class="bg-[#F8F6F2] text-[#354A3D] px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap flex items-center gap-1.5 shadow-sm transition-all hover:bg-white">
+                    <a href="#tat-ca" class="bg-cream text-[#354A3D] px-4 py-2 rounded-full text-[13px] font-semibold whitespace-nowrap flex items-center gap-1.5 shadow-sm transition-all hover:bg-white">
                         Tất cả
                     </a>
                     @foreach($menuData as $category)

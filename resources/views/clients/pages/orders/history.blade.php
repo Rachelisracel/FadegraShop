@@ -1,6 +1,6 @@
 @extends('layouts.client_home')
 
-@section('title', 'Đơn hàng của tôi — Fadegra')
+@section('title', 'Lịch sử đơn hàng — Fadegra')
 
 @section('content')
 <div class="bg-cream min-h-screen py-10">
@@ -9,8 +9,8 @@
         <!-- Tiêu đề -->
         <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
             <div>
-                <h1 class="font-serif text-3xl font-bold text-[#1F2937]">Đơn hàng của tôi</h1>
-                <p class="text-gray-500 text-sm mt-1">Xin chào {{ Auth::user()->name ?? 'Quý khách' }}, đây là danh sách đơn hàng hiện tại của bạn.</p>
+                <h1 class="font-serif text-3xl font-bold text-[#1F2937]">Lịch sử đơn hàng</h1>
+                <p class="text-gray-500 text-sm mt-1">Xin chào {{ Auth::user()->name ?? 'Quý khách' }}, danh sách các đơn hàng đã hoàn tất hoặc đã hủy.</p>
             </div>
         </div>
 
@@ -20,7 +20,7 @@
             <span class="mx-2">/</span>
             <a href="{{ url('/profile') }}" class="hover:text-[#354A3D] transition-colors">Tài khoản</a>
             <span class="mx-2">/</span>
-            <span class="text-[#354A3D] font-bold">Đơn hàng</span>
+            <span class="text-[#354A3D] font-bold">Lịch sử đơn hàng</span>
         </div>
 
         <!-- BỐ CỤC 2 CỘT -->
@@ -60,7 +60,7 @@
                         @endforeach
                     </div>
 
-                    <!-- NỘI DUNG ĐƠN HÀNG -->
+                    <!-- NỘI DUNG LỊCH SỬ ĐƠN HÀNG -->
                     <div class="space-y-6">
                         @forelse($orders ?? [] as $order)
                             <div class="border border-gray-100 rounded-2xl p-5 hover:shadow-md transition-shadow bg-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -73,9 +73,6 @@
                                         <span class="font-bold text-[#354A3D] block text-base">{{ number_format($order->total_price ?? $order->total_amount ?? 0, 0, ',', '.') }}đ</span>
                                         @php
                                             $statusColors = [
-                                                'pending' => 'bg-yellow-50 text-yellow-700',
-                                                'processing' => 'bg-blue-50 text-blue-700',
-                                                'shipping' => 'bg-indigo-50 text-indigo-700',
                                                 'completed' => 'bg-green-50 text-green-700',
                                                 'cancelled' => 'bg-red-50 text-red-700',
                                             ];
@@ -93,10 +90,10 @@
                         @empty
                             <div class="text-center py-16">
                                 <div class="bg-gray-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <i class="fa-solid fa-cart-shopping text-4xl text-gray-300"></i>
+                                    <i class="fa-solid fa-clipboard-list text-4xl text-gray-300"></i>
                                 </div>
-                                <h3 class="text-lg font-bold text-gray-700">Chưa có đơn hàng nào</h3>
-                                <p class="text-gray-500 mt-2 text-sm">Các đơn hàng hiện tại của bạn sẽ hiển thị ở đây.</p>
+                                <h3 class="text-lg font-bold text-gray-700">Chưa có lịch sử đơn hàng</h3>
+                                <p class="text-gray-500 mt-2 text-sm">Các đơn hàng đã hoàn tất hoặc đã hủy sẽ hiển thị ở đây.</p>
                             </div>
                         @endforelse
                     </div>

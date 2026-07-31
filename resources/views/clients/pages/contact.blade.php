@@ -3,7 +3,7 @@
 @section('title', 'Liên hệ — FADEGRA')
 
 @section('content')
-<div class="bg-[#F8F6F2] py-12 sm:py-20 font-sans">
+<div class="bg-cream py-12 sm:py-20 font-sans">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <!-- Tiêu đề trang -->

@@ -3,7 +3,7 @@
 @section('title', 'Đăng ký tài khoản — Fadegra')
 
 @section('content')
-<div class="min-h-[calc(100vh-76px)] flex bg-[#F8F6F2] flex-row-reverse">
+<div class="min-h-[calc(100vh-76px)] flex bg-cream flex-row-reverse">
     
     <!-- Nửa phải: Hình ảnh (Chỉ hiện trên PC) -->
     <div class="hidden lg:block lg:w-1/2 relative overflow-hidden">

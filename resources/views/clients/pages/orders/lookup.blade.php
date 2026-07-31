@@ -1,9 +1,9 @@
-@extends('layouts.client_menu')
+@extends('layouts.client_home')
 
 @section('title', 'Tra cứu đơn hàng — Fadegra')
 
 @section('content')
-<div class="bg-[#F8F6F2] min-h-[calc(100vh-76px)] flex items-center justify-center py-12 px-4">
+<div class="bg-cream min-h-[calc(100vh-76px)] flex items-center justify-center py-12 px-4">
     <div class="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-black/5">
 
         <div class="text-center mb-8">

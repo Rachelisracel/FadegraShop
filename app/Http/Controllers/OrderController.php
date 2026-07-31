@@ -18,8 +18,8 @@ class OrderController extends Controller
      */
     protected array $timelineSteps = [
         'pending'    => ['label' => 'Chờ xác nhận', 'icon' => 'fa-receipt'],
-        'processing' => ['label' => 'Đang chuẩn bị', 'icon' => 'fa-mug-hot'],
-        'shipping'   => ['label' => 'Đang giao hàng', 'icon' => 'fa-truck-fast'],
+        'processing' => ['label' => 'Chờ lấy hàng', 'icon' => 'fa-box'],
+        'shipping'   => ['label' => 'Chờ giao hàng', 'icon' => 'fa-truck-fast'],
         'completed'  => ['label' => 'Hoàn thành', 'icon' => 'fa-circle-check'],
     ];
 
@@ -43,24 +43,85 @@ class OrderController extends Controller
         $status = $request->query('status', 'all');
 
         $query = Order::with(['orderItems.product.images', 'payments'])
-            ->where('user_id', Auth::id());
+            ->where('user_id', Auth::id())
+            ->whereIn('status', ['pending', 'processing', 'shipping', 'completed']);
 
-        if ($status !== 'all' && array_key_exists($status, $this->statusLabels())) {
+        if ($status !== 'all' && in_array($status, ['pending', 'processing', 'shipping', 'completed'])) {
             $query->where('status', $status);
         }
 
         $orders = $query->latest()->paginate(6)->withQueryString();
 
         $statusCounts = Order::where('user_id', Auth::id())
+            ->whereIn('status', ['pending', 'processing', 'shipping', 'completed'])
             ->select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        $tabs = [
+            'all' => 'Tất cả',
+            'pending' => 'Chờ xác nhận',
+            'processing' => 'Chờ lấy hàng',
+            'shipping' => 'Chờ giao hàng',
+            'completed' => 'Đánh giá sản phẩm',
+        ];
+
         return view('clients.pages.orders.index', [
-            'orders'        => $orders,
-            'status'        => $status,
-            'statusLabels'  => $this->statusLabels(),
-            'statusCounts'  => $statusCounts,
+            'orders'          => $orders,
+            'status'          => $status,
+            'statusLabels'    => $this->statusLabels(),
+            'statusCounts'    => $statusCounts,
+            'tabs'            => $tabs,
+            'pageTitle'       => 'Đơn hàng của tôi',
+            'pageDescription' => 'Danh sách đơn hàng hiện tại của bạn.',
+            'mode'            => 'orders',
+        ]);
+    }
+
+    /**
+     * Lịch sử đơn hàng (đã mua, đã hủy)
+     * GET /orders/history
+     */
+    public function history(Request $request)
+    {
+        $userRole = Auth::user()->roleRelation->name ?? '';
+        if (in_array($userRole, ['admin', 'staff'])) {
+            return redirect()->route('orders.index');
+        }
+
+        $status = $request->query('status', 'all');
+
+        $query = Order::with(['orderItems.product.images', 'payments'])
+            ->where('user_id', Auth::id())
+            ->whereIn('status', ['completed', 'cancelled']);
+
+        if ($status !== 'all' && in_array($status, ['completed', 'cancelled'])) {
+            $query->where('status', $status);
+        }
+
+        $orders = $query->latest()->paginate(6)->withQueryString();
+
+        $statusCounts = Order::where('user_id', Auth::id())
+            ->whereIn('status', ['completed', 'cancelled'])
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $tabs = [
+            'all' => 'Tất cả lịch sử',
+            'completed' => 'Đã mua',
+            'cancelled' => 'Đã hủy',
+        ];
+
+        return view('clients.pages.orders.history', [
+            'orders'          => $orders,
+            'status'          => $status,
+            'statusLabels'    => $this->statusLabels(),
+            'statusCounts'    => $statusCounts,
+            'tabs'            => $tabs,
+            'pageTitle'       => 'Lịch sử đơn hàng',
+            'pageDescription' => 'Danh sách các đơn hàng đã hoàn tất hoặc đã hủy.',
+            'mode'            => 'history',
         ]);
     }
 
@@ -288,8 +349,8 @@ class OrderController extends Controller
     {
         return [
             'pending'    => 'Chờ xác nhận',
-            'processing' => 'Đang chuẩn bị',
-            'shipping'   => 'Đang giao',
+            'processing' => 'Chờ lấy hàng',
+            'shipping'   => 'Chờ giao hàng',
             'completed'  => 'Hoàn thành',
             'cancelled'  => 'Đã hủy',
         ];

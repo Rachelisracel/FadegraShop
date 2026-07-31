@@ -3,7 +3,7 @@
 @section('title', 'Xác nhận mã OTP — FADEGRA')
 
 @section('content')
-<div class="min-h-[calc(100vh-76px)] flex items-center justify-center bg-[#F8F6F2] py-12">
+<div class="min-h-[calc(100vh-76px)] flex items-center justify-center bg-cream py-12">
     <div class="max-w-md w-full bg-white p-8 rounded-3xl shadow-sm border border-black/5 text-center">
         
         <h2 class="text-2xl font-bold text-[#354A3D] mb-2">Nhập mã xác nhận</h2>

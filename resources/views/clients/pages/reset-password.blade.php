@@ -3,7 +3,7 @@
 @section('title', 'Đặt lại mật khẩu — Fadegra')
 
 @section('content')
-    <div class="min-h-[calc(100vh-76px)] flex bg-[#F8F6F2]">
+    <div class="min-h-[calc(100vh-76px)] flex bg-cream">
 
         <!-- Form Đặt lại mật khẩu -->
         <div class="w-full flex items-center justify-center p-6 sm:p-12">

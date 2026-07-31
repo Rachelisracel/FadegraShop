@@ -1,4 +1,4 @@
-@extends('layouts.client_menu')
+@extends('layouts.client_home')
 
 @section('title', 'Chi tiết đơn hàng #' . str_pad($order->id, 6, '0', STR_PAD_LEFT) . ' — Fadegra')
 
@@ -22,7 +22,7 @@
     $currentStepIndex = array_search($order->status, $stepKeys);
 @endphp
 
-<div class="bg-[#F8F6F2] min-h-screen py-8 md:py-12">
+<div class="bg-cream min-h-screen py-8 md:py-12">
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
 
         <!-- Back + Header -->
@@ -116,7 +116,7 @@
                                 $alreadyReviewed = in_array($item->product_id, $reviewedProductIds);
                             @endphp
                             <div class="flex items-start gap-4 pb-5 border-b border-gray-100 last:border-0 last:pb-0">
-                                <div class="w-16 h-16 rounded-xl bg-[#F8F6F2] overflow-hidden shrink-0 flex items-center justify-center">
+                                <div class="w-16 h-16 rounded-xl bg-cream overflow-hidden shrink-0 flex items-center justify-center">
                                     @if($img)
                                         <img src="{{ asset('images/' . $img) }}" alt="{{ $item->product->name }}" class="w-full h-full object-cover">
                                     @else

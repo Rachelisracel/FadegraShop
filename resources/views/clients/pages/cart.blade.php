@@ -3,7 +3,7 @@
 @section('title', 'Giỏ hàng của bạn — FADEGRA')
 
 @section('content')
-<div class="bg-[#F8F6F2] min-h-screen font-sans pb-24 relative">
+<div class="bg-cream min-h-screen font-sans pb-24 relative">
     
     <!-- HEADER -->
     <header class="bg-[#354A3D] pt-6 pb-6 px-6 sticky top-0 z-50 shadow-sm">
